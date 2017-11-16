@@ -85,7 +85,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexResponse performSyncIndex(IndexRequest indexRequest) {
+    protected IndexResponse executeIndexAndRefresh(IndexRequest indexRequest) {
         IndexResponse indexResponse = this.client.index(indexRequest).actionGet();
         return indexResponse;
     }

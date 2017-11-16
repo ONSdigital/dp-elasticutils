@@ -65,7 +65,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexResponse performSyncIndex(IndexRequest indexRequest) throws IOException {
+    protected IndexResponse executeIndexAndRefresh(IndexRequest indexRequest) throws IOException {
         IndexResponse indexResponse = this.client.index(indexRequest);
         return indexResponse;
     }
