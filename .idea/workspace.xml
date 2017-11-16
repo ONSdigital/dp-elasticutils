@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7df6e80d-0033-40b4-a50c-c37c6a1438af" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchClient.java" afterPath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchClient.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java" afterPath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java" afterPath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/indicies/ElasticIndexNames.java" afterPath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/indicies/ElasticIndexNames.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/util/JsonUtils.java" afterPath="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/util/JsonUtils.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java" afterPath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/index/ElasticIndex.java" afterPath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/index/ElasticIndex.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/models/GeoLocation.java" afterPath="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/models/GeoLocation.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -28,8 +22,8 @@
             <file leaf-file-name="TestClient.java" pinned="false" current-in-tab="true">
               <entry file="file://$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java">
                 <provider selected="true" editor-type-id="text-editor">
-                  <state relative-caret-position="376">
-                    <caret line="53" column="57" lean-forward="false" selection-start-line="53" selection-start-column="57" selection-end-line="53" selection-end-column="57" />
+                  <state relative-caret-position="381">
+                    <caret line="79" column="17" lean-forward="true" selection-start-line="79" selection-start-column="17" selection-end-line="79" selection-end-column="17" />
                     <folding>
                       <element signature="imports" expanded="true" />
                       <element signature="e#1442#1455#0" expanded="true" />
@@ -67,11 +61,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="ElasticSearchClient.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ElasticSearchClient.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="585">
-              <caret line="39" column="66" lean-forward="true" selection-start-line="39" selection-start-column="66" selection-end-line="39" selection-end-column="66" />
+            <state relative-caret-position="1230">
+              <caret line="82" column="40" lean-forward="false" selection-start-line="82" selection-start-column="25" selection-end-line="82" selection-end-column="40" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#3637#3638#0" expanded="true" />
@@ -102,39 +96,49 @@
       <file leaf-file-name="ElasticSearchTransportClient.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="390">
-              <caret line="26" column="45" lean-forward="false" selection-start-line="26" selection-start-column="45" selection-end-line="26" selection-end-column="45" />
+            <state relative-caret-position="185">
+              <caret line="121" column="0" lean-forward="false" selection-start-line="121" selection-start-column="0" selection-end-line="136" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2793#2794#0" expanded="true" />
-                <element signature="e#2859#2860#0" expanded="true" />
-                <element signature="e#4199#4200#0" expanded="true" />
-                <element signature="e#4226#4227#0" expanded="true" />
-                <element signature="e#4301#4302#0" expanded="true" />
-                <element signature="e#4358#4359#0" expanded="true" />
-                <element signature="e#4422#4423#0" expanded="true" />
-                <element signature="e#4463#4464#0" expanded="true" />
-                <element signature="e#4496#4497#0" expanded="true" />
-                <element signature="e#4530#4531#0" expanded="true" />
-                <element signature="e#4602#4603#0" expanded="true" />
-                <element signature="e#4649#4650#0" expanded="true" />
+                <element signature="e#3282#3283#0" expanded="true" />
+                <element signature="e#3348#3349#0" expanded="true" />
+                <element signature="e#5729#5730#0" expanded="true" />
+                <element signature="e#5823#5824#0" expanded="true" />
+                <element signature="e#6291#6292#0" expanded="true" />
+                <element signature="e#6348#6349#0" expanded="true" />
+                <element signature="e#6412#6413#0" expanded="true" />
+                <element signature="e#6453#6454#0" expanded="true" />
+                <element signature="e#6486#6487#0" expanded="true" />
+                <element signature="e#6520#6521#0" expanded="true" />
+                <element signature="e#6592#6593#0" expanded="true" />
+                <element signature="e#6639#6640#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ElasticSearchRESTClient.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="ElasticSearchRESTClient.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="24" column="46" lean-forward="false" selection-start-line="24" selection-start-column="46" selection-end-line="24" selection-end-column="46" />
+            <state relative-caret-position="1680">
+              <caret line="112" column="23" lean-forward="false" selection-start-line="112" selection-start-column="23" selection-end-line="112" selection-end-column="23" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#4297#4298#0" expanded="true" />
-                <element signature="e#4338#4339#0" expanded="true" />
-                <element signature="e#4413#4414#0" expanded="true" />
-                <element signature="e#4471#4472#0" expanded="true" />
+                <element signature="e#4501#4502#0" expanded="true" />
+                <element signature="e#4542#4543#0" expanded="true" />
+                <element signature="e#4617#4618#0" expanded="true" />
+                <element signature="e#4675#4676#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="BulkProcessorConfiguration.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/bulk/configuration/BulkProcessorConfiguration.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="521">
+              <caret line="54" column="55" lean-forward="false" selection-start-line="54" selection-start-column="55" selection-end-line="54" selection-end-column="55" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -160,6 +164,7 @@
       <find>settings</find>
       <find>Node</find>
       <find>indexName</find>
+      <find>getCl</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -185,12 +190,12 @@
         <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/DefaultSearchClient.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/util/JsonUtils.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/indicies/ElasticIndexNames.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchClient.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/models/GeoLocation.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/index/ElasticIndex.java" />
         <option value="$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java" />
       </list>
     </option>
   </component>
@@ -266,6 +271,27 @@
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="elasticutils" type="462c0819:PsiDirectoryNode" />
               <item name="client" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dp-elasticutils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dp-elasticutils" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="elasticutils" type="462c0819:PsiDirectoryNode" />
+              <item name="client" type="462c0819:PsiDirectoryNode" />
+              <item name="bulk" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="dp-elasticutils" type="b2602c69:ProjectViewProjectNode" />
+              <item name="dp-elasticutils" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="elasticutils" type="462c0819:PsiDirectoryNode" />
+              <item name="client" type="462c0819:PsiDirectoryNode" />
+              <item name="bulk" type="462c0819:PsiDirectoryNode" />
+              <item name="configuration" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="dp-elasticutils" type="b2602c69:ProjectViewProjectNode" />
@@ -578,9 +604,9 @@
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="JUnit.TestClient.testHttpIndexSearchAndDelete" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.TestClient.testHttpSearchandDelete" />
-        <item index="2" class="java.lang.String" itemvalue="JUnit.TestClient.testHttpSearch" />
-        <item index="3" class="java.lang.String" itemvalue="JUnit.TestClient.createTestIndexHttp" />
+        <item index="1" class="java.lang.String" itemvalue="JUnit.TestClient.createTestIndexHttp" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.TestClient.testHttpSearchandDelete" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.TestClient.testHttpSearch" />
         <item index="4" class="java.lang.String" itemvalue="JUnit.TestClient.createTestIndexTcp" />
       </list>
     </recent_temporary>
@@ -604,6 +630,9 @@
     <servers />
   </component>
   <component name="TestHistory">
+    <history-entry file="TestClient_createTestIndexHttp - 2017.11.16 at 16h 32m 54s.xml">
+      <configuration name="TestClient.createTestIndexHttp" configurationId="JUnit" />
+    </history-entry>
     <history-entry file="TestClient_testHttpIndexSearchAndDelete - 2017.11.16 at 15h 14m 24s.xml">
       <configuration name="TestClient.testHttpIndexSearchAndDelete" configurationId="JUnit" />
     </history-entry>
@@ -619,11 +648,8 @@
     <history-entry file="TestClient_testHttpIndexSearchAndDelete - 2017.11.16 at 15h 31m 50s.xml">
       <configuration name="TestClient.testHttpIndexSearchAndDelete" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="TestClient_testHttpSearch - 2017.11.16 at 15h 07m 35s.xml">
-      <configuration name="TestClient.testHttpSearch" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="TestClient_testHttpSearch - 2017.11.16 at 15h 10m 24s.xml">
-      <configuration name="TestClient.testHttpSearch" configurationId="JUnit" />
+    <history-entry file="TestClient_testHttpIndexSearchAndDelete - 2017.11.16 at 16h 33m 09s.xml">
+      <configuration name="TestClient.testHttpIndexSearchAndDelete" configurationId="JUnit" />
     </history-entry>
     <history-entry file="TestClient_testHttpSearch - 2017.11.16 at 15h 10m 44s.xml">
       <configuration name="TestClient.testHttpSearch" configurationId="JUnit" />
@@ -647,7 +673,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32958803" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32958803" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -863,14 +889,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/bulk/configuration/BulkProcessorConfiguration.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
-          <caret line="54" column="55" lean-forward="false" selection-start-line="54" selection-start-column="55" selection-end-line="54" selection-end-column="55" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/engine/ElasticSearchClient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1985">
@@ -947,42 +965,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="24" column="46" lean-forward="false" selection-start-line="24" selection-start-column="46" selection-end-line="24" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#4297#4298#0" expanded="true" />
-            <element signature="e#4338#4339#0" expanded="true" />
-            <element signature="e#4413#4414#0" expanded="true" />
-            <element signature="e#4471#4472#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="390">
-          <caret line="26" column="45" lean-forward="false" selection-start-line="26" selection-start-column="45" selection-end-line="26" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2793#2794#0" expanded="true" />
-            <element signature="e#2859#2860#0" expanded="true" />
-            <element signature="e#4199#4200#0" expanded="true" />
-            <element signature="e#4226#4227#0" expanded="true" />
-            <element signature="e#4301#4302#0" expanded="true" />
-            <element signature="e#4358#4359#0" expanded="true" />
-            <element signature="e#4422#4423#0" expanded="true" />
-            <element signature="e#4463#4464#0" expanded="true" />
-            <element signature="e#4496#4497#0" expanded="true" />
-            <element signature="e#4530#4531#0" expanded="true" />
-            <element signature="e#4602#4603#0" expanded="true" />
-            <element signature="e#4649#4650#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/util/JsonUtils.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -1013,23 +995,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="53" column="57" lean-forward="false" selection-start-line="53" selection-start-column="57" selection-end-line="53" selection-end-column="57" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1442#1455#0" expanded="true" />
-            <element signature="e#2181#2194#0" expanded="true" />
-            <element signature="e#3320#3333#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchClient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="585">
-          <caret line="39" column="66" lean-forward="true" selection-start-line="39" selection-start-column="66" selection-end-line="39" selection-end-column="66" />
+        <state relative-caret-position="1230">
+          <caret line="82" column="40" lean-forward="false" selection-start-line="82" selection-start-column="25" selection-end-line="82" selection-end-column="40" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#3637#3638#0" expanded="true" />
@@ -1040,6 +1009,63 @@
             <element signature="e#5078#5079#0" expanded="true" />
             <element signature="e#5118#5119#0" expanded="true" />
             <element signature="e#5158#5159#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchTransportClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="121" column="0" lean-forward="false" selection-start-line="121" selection-start-column="0" selection-end-line="136" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#3282#3283#0" expanded="true" />
+            <element signature="e#3348#3349#0" expanded="true" />
+            <element signature="e#5729#5730#0" expanded="true" />
+            <element signature="e#5823#5824#0" expanded="true" />
+            <element signature="e#6291#6292#0" expanded="true" />
+            <element signature="e#6348#6349#0" expanded="true" />
+            <element signature="e#6412#6413#0" expanded="true" />
+            <element signature="e#6453#6454#0" expanded="true" />
+            <element signature="e#6486#6487#0" expanded="true" />
+            <element signature="e#6520#6521#0" expanded="true" />
+            <element signature="e#6592#6593#0" expanded="true" />
+            <element signature="e#6639#6640#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/bulk/configuration/BulkProcessorConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="521">
+          <caret line="54" column="55" lean-forward="false" selection-start-line="54" selection-start-column="55" selection-end-line="54" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/github/onsdigital/elasticutils/TestClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="381">
+          <caret line="79" column="17" lean-forward="true" selection-start-line="79" selection-start-column="17" selection-end-line="79" selection-end-column="17" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#1442#1455#0" expanded="true" />
+            <element signature="e#2181#2194#0" expanded="true" />
+            <element signature="e#3320#3333#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/github/onsdigital/elasticutils/client/ElasticSearchRESTClient.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1680">
+          <caret line="112" column="23" lean-forward="false" selection-start-line="112" selection-start-column="23" selection-end-line="112" selection-end-column="23" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#4501#4502#0" expanded="true" />
+            <element signature="e#4542#4543#0" expanded="true" />
+            <element signature="e#4617#4618#0" expanded="true" />
+            <element signature="e#4675#4676#0" expanded="true" />
           </folding>
         </state>
       </provider>

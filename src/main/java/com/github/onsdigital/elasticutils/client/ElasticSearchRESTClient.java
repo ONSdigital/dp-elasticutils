@@ -8,6 +8,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -103,6 +104,13 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
         DeleteResponse deleteResponse = this.client.delete(deleteRequest);
         return deleteResponse;
+    }
+
+    // ADMIN //
+
+    public MainResponse info() throws IOException {
+        MainResponse response = this.client.info();
+        return response;
     }
 
     protected BulkProcessor getBulkProcessor() {

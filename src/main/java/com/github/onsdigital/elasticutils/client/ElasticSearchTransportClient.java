@@ -3,20 +3,28 @@ package com.github.onsdigital.elasticutils.client;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
@@ -27,6 +35,8 @@ import java.net.UnknownHostException;
  * Implementation of Elasticsearch TCP client
  */
 public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchTransportClient.class);
 
     private final Client client;
     private final BulkProcessor bulkProcessor;
@@ -98,7 +108,40 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 
     @Override
     public DeleteResponse deleteById(String id) {
-        return null;
+        // Synchronous
+        DeleteRequest deleteRequest = new DeleteRequest()
+                .index(super.indexName.getIndexName())
+                .type(super.indexType.getIndexType())
+                .id(id)
+                .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+
+        DeleteResponse deleteResponse = this.client.delete(deleteRequest).actionGet();
+        return deleteResponse;
+    }
+
+    public void deleteByQuery(QueryBuilder qb) {
+        DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+                .filter(qb)
+                .source(super.indexName.getIndexName())
+                .execute(new ActionListener<BulkByScrollResponse>() {
+                    @Override
+                    public void onResponse(BulkByScrollResponse response) {
+                        long deleted = response.getDeleted();
+                        LOGGER.info(String.format("Deleted %d records.", deleted));
+                    }
+                    @Override
+                    public void onFailure(Exception e) {
+                        LOGGER.error("Exception in deleteByQuery:", e);
+                    }
+                });
+    }
+
+    // Requires the admin cluster. Currently only implemented for the TCP client
+    public DeleteIndexResponse deleteIndex(ElasticIndexNames indexName) {
+        DeleteIndexResponse deleteIndexResponse = this.admin().indices().delete(
+                new DeleteIndexRequest(indexName.getIndexName())
+        ).actionGet();
+        return deleteIndexResponse;
     }
 
     @Override
@@ -119,12 +162,5 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 
     public AdminClient admin() {
         return this.getClient().admin();
-    }
-
-    public DeleteIndexResponse deleteIndex(ElasticIndexNames indexName) {
-        DeleteIndexResponse deleteIndexResponse = this.admin().indices().delete(
-                new DeleteIndexRequest(indexName.getIndexName())
-        ).actionGet();
-        return deleteIndexResponse;
     }
 }
