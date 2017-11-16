@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.UnknownHostException;
 
+import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
+
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
@@ -83,7 +85,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, WriteRequest.RefreshPolicy refreshPolicy) {
+    protected IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, RefreshPolicy refreshPolicy) {
         indexRequest.setRefreshPolicy(refreshPolicy);
 
         IndexResponse indexResponse = this.client.index(indexRequest).actionGet();

@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
+
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
@@ -87,7 +89,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     // INDEX //
 
-    protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, WriteRequest.RefreshPolicy refreshPolicy) throws IOException;
+    protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, RefreshPolicy refreshPolicy) throws IOException;
 
     public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
