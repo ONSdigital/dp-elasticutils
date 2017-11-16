@@ -8,6 +8,7 @@ import com.github.onsdigital.elasticutils.models.GeoLocation;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.Response;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
@@ -60,7 +61,7 @@ public class TestClient {
         // Create
         createTestIndexHttp();
 
-        ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
+        ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
                 HOSTNAME, ElasticIndex.TEST, GeoLocation.class
         );
 
@@ -78,15 +79,24 @@ public class TestClient {
         assertEquals(ID_HTTP, geoLocations.get(0).getGeoId());
 
         // Delete
-        String id = hits.getAt(0).getId();
-        DeleteResponse deleteResponse = null;
-        try {
-            deleteResponse = searchClient.deleteById(id);
-        } catch (IOException e) {
-            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
-        }
+//        String id = hits.getAt(0).getId();
+//        DeleteResponse deleteResponse = null;
+//        try {
+//            deleteResponse = searchClient.deleteById(id);
+//        } catch (IOException e) {
+//            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
+//        }
+//
+//        assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
 
-        assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
+        Response response = null;
+        try {
+             response = searchClient.deleteIndex(ElasticIndex.TEST);
+
+             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

@@ -11,6 +11,8 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -106,6 +108,23 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return deleteResponse;
     }
 
+    public Response deleteIndex(ElasticIndexNames indexName) throws IOException {
+        /*
+        Uses the low-level API to make a DELETE request against an entire index.
+         */
+        String endPoint = getIndexEndPoint(indexName);
+
+        Response response = this.getLowLevelClient().performRequest(
+                HttpRequestType.DELETE.getRequestType(), endPoint
+        );
+
+        return response;
+    }
+
+    public static String getIndexEndPoint(ElasticIndexNames indexName) {
+        return "/" + indexName.getIndexName();
+    }
+
     // ADMIN //
 
     public MainResponse info() throws IOException {
@@ -117,8 +136,33 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return this.bulkProcessor;
     }
 
+    public RestHighLevelClient getClient() {
+        return this.client;
+    }
+
+    public RestClient getLowLevelClient() {
+        return this.client.getLowLevelClient();
+    }
+
     @Override
     public ElasticSearchHelper.ClientType getClientType() {
         return ElasticSearchHelper.ClientType.REST;
+    }
+
+    public enum HttpRequestType {
+        GET("GET"),
+        POST("POST"),
+        PUT("PUT"),
+        DELETE("DELETE");
+
+        private String requestType;
+
+        HttpRequestType(String requestType) {
+            this.requestType = requestType;
+        }
+
+        public String getRequestType() {
+            return requestType;
+        }
     }
 }

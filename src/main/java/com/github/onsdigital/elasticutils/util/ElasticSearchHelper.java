@@ -2,7 +2,9 @@ package com.github.onsdigital.elasticutils.util;
 
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -55,10 +57,13 @@ public class ElasticSearchHelper {
 
             LOGGER.info("Attempting to make HTTP connection to ES database at host {}", hostName);
 
+            // Set some basic headers for all requests
+            BasicHeader[] headers = { new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json") };
+
             RestHighLevelClient client = new RestHighLevelClient(
                     RestClient.builder(
                             new HttpHost(hostName, http_port, Scheme.HTTP.getScheme())
-                    )
+                    ).setDefaultHeaders(headers)
             );
 
             httpConnectionMap.put(hostName, client);
