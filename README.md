@@ -26,6 +26,10 @@ environment variables, or with a link to a configuration guide.
 | -------------------- | ------- | -----------
 | BIND_ADDR            | :8080   | The host and port to bind to
 
+
+### Notes
+REST client confirmed to work for ES 5.5.0
+
 ### Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for details.
