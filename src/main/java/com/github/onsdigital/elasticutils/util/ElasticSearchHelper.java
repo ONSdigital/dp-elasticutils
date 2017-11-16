@@ -3,6 +3,7 @@ package com.github.onsdigital.elasticutils.util;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
 import org.apache.http.HttpHost;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.transport.TransportClient;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author sullid (David Sullivan) on 14/11/2017
@@ -32,6 +35,14 @@ public class ElasticSearchHelper {
     public static final int DEFAULT_TCP_PORT = 9300;
     public static final int DEFAULT_XPACK_TCP_PORT = 9301;
 
+    private static Map<String, RestHighLevelClient> httpConnectionMap;
+    private static Map<String, TransportClient> tcpConnectionMap;
+
+    static {
+        httpConnectionMap = new ConcurrentHashMap<>();
+        tcpConnectionMap = new ConcurrentHashMap<>();
+    }
+
     // HTTP
 
     public static RestHighLevelClient getRestClient(String hostName) {
@@ -39,13 +50,24 @@ public class ElasticSearchHelper {
     }
 
     public static RestHighLevelClient getRestClient(String hostName, int http_port) {
-        RestHighLevelClient client = new RestHighLevelClient(
-                RestClient.builder(
-                        new HttpHost(hostName, http_port, "http")
-                )
-        );
 
-        return client;
+        if(!httpConnectionMap.containsKey(hostName)) {
+
+            LOGGER.info("Attempting to make HTTP connection to ES database at host {}", hostName);
+
+            RestHighLevelClient client = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost(hostName, http_port, Scheme.HTTP.getScheme())
+                    )
+            );
+
+            httpConnectionMap.put(hostName, client);
+
+            LOGGER.info("Successfully made HTTP connection to ES database at host {}", hostName);
+
+        }
+
+        return httpConnectionMap.get(hostName);
     }
 
     // TCP
@@ -64,14 +86,23 @@ public class ElasticSearchHelper {
     }
 
     public static TransportClient getTransportClient(String hostName, int transport_port, Settings settings) throws UnknownHostException {
-        if(LOGGER.isInfoEnabled()) LOGGER.info(String.format("Attempting to make connection to ES db %s", hostName));
 
-        TransportClient transportClient = new PreBuiltTransportClient(settings)
-                .addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), transport_port));
+        if(!tcpConnectionMap.containsKey(hostName)) {
 
-        if(LOGGER.isInfoEnabled()) LOGGER.info(String.format("Successfully made connection to ES db %s", hostName));
+            if (LOGGER.isInfoEnabled())
+                LOGGER.info(String.format("Attempting to make TCP connection to ES db %s", hostName));
 
-        return transportClient;
+            TransportClient transportClient = new PreBuiltTransportClient(settings)
+                    .addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), transport_port));
+
+            tcpConnectionMap.put(hostName, transportClient);
+
+            if (LOGGER.isInfoEnabled())
+                LOGGER.info(String.format("Successfully made connection to ES db %s", hostName));
+
+        }
+
+        return tcpConnectionMap.get(hostName);
     }
 
     public static TransportClient getXpackTransportClient(String hostName) throws UnknownHostException {
@@ -111,6 +142,35 @@ public class ElasticSearchHelper {
                 .setBulkActions(numBulkActions)
                 .build());
         return bulkProcessorConfiguration;
+    }
+
+    public enum ClientType {
+        TCP("TCP"),
+        REST("REST");
+
+        private String clientType;
+
+        ClientType(String clientType) {
+            this.clientType = clientType;
+        }
+
+        public String getClientType() {
+            return clientType;
+        }
+    }
+
+    public enum Scheme {
+        HTTP("http");
+
+        private String scheme;
+
+        Scheme(String scheme) {
+            this.scheme = scheme;
+        }
+
+        public String getScheme() {
+            return scheme;
+        }
     }
 
 }

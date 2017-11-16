@@ -1,56 +1,127 @@
 package com.github.onsdigital.elasticutils.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
+import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import com.github.onsdigital.elasticutils.util.JsonUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHits;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
+ *
+ * Single class to expose index/search/delete APIs for both the HTTP and TCP clients
  */
-public abstract class ElasticSearchClient implements AutoCloseable {
+public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected IndexType indexType = IndexType.DOCUMENT;
 
     protected final String hostName;
     protected final int port;
+    protected final ElasticIndexNames indexName;
     protected final BulkProcessorConfiguration bulkProcessorConfiguration;
+    protected Class<T> returnClass;
 
-    public ElasticSearchClient(String hostName, int port, BulkProcessorConfiguration bulkProcessorConfiguration) {
+    private static ObjectMapper MAPPER = new ObjectMapper();
+
+    public ElasticSearchClient(String hostName, int port, ElasticIndexNames indexName,
+                               BulkProcessorConfiguration bulkProcessorConfiguration,
+                               Class<T> returnClass) {
         this.hostName = hostName;
         this.port = port;
+        this.indexName = indexName;
         this.bulkProcessorConfiguration = bulkProcessorConfiguration;
+        this.returnClass = returnClass;
     }
 
-    public void index(ElasticIndexNames indexName, Object object) {
-        index(indexName, Arrays.asList(object));
+    // SEARCH //
+
+    // This throws IOException due to the HTTP REST client
+    public abstract SearchHits search(QueryBuilder qb) throws IOException;
+
+    public List<T> searchAndDeserialize(QueryBuilder qb) throws IOException {
+        SearchHits searchHits = search(qb);
+        return deserialize(searchHits);
     }
 
-    public void index(ElasticIndexNames indexName, List<Object> objectList) {
-        index(indexName, objectList.stream());
+    public List<T> deserialize(SearchHits searchHits) {
+        List<T> results = new ArrayList<>();
+
+        searchHits.forEach(hit -> {
+            try {
+                results.add(MAPPER.readValue(hit.getSourceAsString(), returnClass));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        return results;
     }
 
-    public void index(ElasticIndexNames indexName, Stream<Object> objectStream) {
+    // INDEX //
+
+    protected abstract IndexResponse performSyncIndex(IndexRequest indexRequest) throws IOException;
+
+    public IndexResponse syncIndex(T entity) throws IOException {
+        Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
+
+        if (messageBytes.isPresent()) {
+            IndexRequest indexRequest = this.createIndexRequest(messageBytes.get())
+                    .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
+            IndexResponse indexResponse = this.performSyncIndex(indexRequest);
+
+            return indexResponse;
+        } else {
+            throw new IOException("Unable to convert entity to byte array");
+        }
+    }
+
+    @Override
+    public void index(T entity) {
+        index(Arrays.asList(entity));
+    }
+
+    @Override
+    public void index(List<T> entities) {
+        index(entities.stream());
+    }
+
+    @Override
+    public void index(Stream<T> entities) {
         BulkProcessor bulkProcessor = this.getBulkProcessor();
-        objectStream
+        entities
                 .map(x -> JsonUtils.convertJsonToBytes(x))
                 .filter(x -> x.isPresent())
-                .map(x -> createIndexRequest(indexName, x.get()))
+                .map(x -> createIndexRequest(x.get()))
                 .forEach(bulkProcessor::add);
     }
 
+    // DELETE //
+
+    public abstract DeleteResponse deleteById(String id) throws IOException;
+
+    @Override
     public void flush() {
         this.getBulkProcessor().flush();
     }
 
+    @Override
     public synchronized boolean awaitClose(long timeout, TimeUnit unit) throws InterruptedException {
         return this.getBulkProcessor().awaitClose(timeout, unit);
     }
@@ -59,19 +130,11 @@ public abstract class ElasticSearchClient implements AutoCloseable {
         this.getBulkProcessor().close();
     }
 
-    protected abstract IndexRequest createIndexRequest(ElasticIndexNames indexName, byte[] messageBytes);
+    public abstract IndexRequest createIndexRequest(byte[] messageBytes);
 
-    protected abstract IndexRequest createIndexRequest(ElasticIndexNames indexName, byte[] messageBytes, XContentType xContentType);
+    public abstract IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType);
 
-    public abstract ClientType getClientType();
-
-    public String getHostName() {
-        return hostName;
-    }
-
-    public int getPort() {
-        return port;
-    }
+    public abstract ElasticSearchHelper.ClientType getClientType();
 
     protected abstract BulkProcessor getBulkProcessor();
 
@@ -86,21 +149,6 @@ public abstract class ElasticSearchClient implements AutoCloseable {
 
         public String getIndexType() {
             return indexType;
-        }
-    }
-
-    public enum ClientType {
-        TCP("TCP"),
-        REST("REST");
-
-        private String clientType;
-
-        ClientType(String clientType) {
-            this.clientType = clientType;
-        }
-
-        public String getClientType() {
-            return clientType;
         }
     }
 

@@ -1,14 +1,14 @@
-package com.github.onsdigital.elasticutils.engine;
+package com.github.onsdigital.elasticutils.client;
+
+import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
- * @author sullid (David Sullivan) on 14/11/2017
- * @project elasticutils
- *
- * Interface to define default behaviour of a SearchClient
+ * @author sullid (David Sullivan) on 16/11/2017
+ * @project dp-elasticutils
  */
 public interface DefaultSearchClient<T> extends AutoCloseable {
 

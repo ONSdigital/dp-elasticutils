@@ -3,63 +3,105 @@ package com.github.onsdigital.elasticutils.client;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
-import com.github.onsdigital.elasticutils.util.JsonUtils;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.SearchHits;
 
 import java.net.UnknownHostException;
-import java.util.stream.Stream;
 
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
  */
-public class ElasticSearchTransportClient extends ElasticSearchClient {
+public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 
     private final Client client;
     private final BulkProcessor bulkProcessor;
 
-    public ElasticSearchTransportClient(String hostName) throws UnknownHostException {
-        this(hostName, ElasticSearchHelper.DEFAULT_TCP_PORT);
+    public ElasticSearchTransportClient(String hostName, ElasticIndexNames indexName, Class<T> returnClass) throws UnknownHostException {
+        this(hostName, ElasticSearchHelper.DEFAULT_TCP_PORT, indexName, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port) throws UnknownHostException {
-        this(hostName, transport_port, Settings.EMPTY);
+    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Class<T> returnClass) throws UnknownHostException {
+        this(hostName, transport_port, indexName, Settings.EMPTY, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, Settings settings) throws UnknownHostException {
-        this(hostName, transport_port, settings, ElasticSearchHelper.getDefaultBulkProcessorConfiguration());
+    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Settings settings, Class<T> returnClass) throws UnknownHostException {
+        this(hostName, transport_port, indexName, settings, ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
 
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, Settings settings,
-                                        BulkProcessorConfiguration bulkProcessorConfiguration) throws UnknownHostException {
-        super(hostName, transport_port, bulkProcessorConfiguration);
+    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Settings settings,
+                                        BulkProcessorConfiguration bulkProcessorConfiguration, Class<T> returnClass) throws UnknownHostException {
+        super(hostName, transport_port, indexName, bulkProcessorConfiguration, returnClass);
         this.client = ElasticSearchHelper.getTransportClient(super.hostName, super.port, settings);
         this.bulkProcessor = super.bulkProcessorConfiguration.build(client);
     }
 
+    // SEARCH //
+
     @Override
-    protected IndexRequest createIndexRequest(ElasticIndexNames indexName, byte[] messageBytes) {
-        return this.createIndexRequest(indexName, messageBytes, XContentType.JSON);
+    public SearchHits search(QueryBuilder qb) {
+        return search(qb, SearchType.DFS_QUERY_THEN_FETCH);
+    }
+
+    public SearchHits search(QueryBuilder qb, SearchType searchType) {
+        // Here, we fix
+        SearchResponse searchResponse = this.client.prepareSearch()
+                .setIndices(this.indexName.getIndexName())
+                .setTypes(this.indexType.getIndexType())
+                .setSearchType(searchType)
+                .setQuery(qb)
+                .setExplain(true)
+                .execute().actionGet();
+
+        SearchHits searchHits = searchResponse.getHits();
+        return searchHits;
+    }
+
+    // INDEX //
+
+    @Override
+    protected IndexResponse performSyncIndex(IndexRequest indexRequest) {
+        IndexResponse indexResponse = this.client.index(indexRequest).actionGet();
+        return indexResponse;
     }
 
     @Override
-    protected IndexRequest createIndexRequest(ElasticIndexNames indexName, byte[] messageBytes, XContentType xContentType) {
+    public IndexRequest createIndexRequest(byte[] messageBytes) {
+        return this.createIndexRequest(messageBytes, XContentType.JSON);
+    }
+
+    @Override
+    public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
         return this.client.prepareIndex()
-                .setIndex(indexName.getIndexName())
+                .setIndex(super.indexName.getIndexName())
                 .setType(this.indexType.getIndexType())
                 .setSource(messageBytes, xContentType)
                 .request();
     }
 
+    // DELETE //
+
     @Override
-    public ClientType getClientType() {
-        return ClientType.TCP;
+    public DeleteResponse deleteById(String id) {
+        return null;
+    }
+
+    @Override
+    public ElasticSearchHelper.ClientType getClientType() {
+        return ElasticSearchHelper.ClientType.TCP;
     }
 
     @Override
@@ -71,7 +113,16 @@ public class ElasticSearchTransportClient extends ElasticSearchClient {
         return this.client;
     }
 
+    // ADMIN enabled via TCP only //
+
     public AdminClient admin() {
         return this.getClient().admin();
+    }
+
+    public DeleteIndexResponse deleteIndex(ElasticIndexNames indexName) {
+        DeleteIndexResponse deleteIndexResponse = this.admin().indices().delete(
+                new DeleteIndexRequest(indexName.getIndexName())
+        ).actionGet();
+        return deleteIndexResponse;
     }
 }
