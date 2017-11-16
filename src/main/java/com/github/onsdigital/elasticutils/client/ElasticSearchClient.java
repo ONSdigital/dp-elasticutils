@@ -34,7 +34,7 @@ import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
  */
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
-    protected IndexType indexType = IndexType.DOCUMENT;
+    protected DocumentType documentType = DocumentType.DOCUMENT;
 
     protected final String hostName;
     protected final int port;
@@ -149,17 +149,17 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected abstract BulkProcessor getBulkProcessor();
 
-    public enum IndexType {
+    public enum DocumentType {
         DOCUMENT("document");
 
-        private String indexType;
+        private String documentType;
 
-        IndexType(String indexType) {
-            this.indexType = indexType;
+        DocumentType(String documentType) {
+            this.documentType = documentType;
         }
 
-        public String getIndexType() {
-            return indexType;
+        public String getDocumentType() {
+            return documentType;
         }
     }
 

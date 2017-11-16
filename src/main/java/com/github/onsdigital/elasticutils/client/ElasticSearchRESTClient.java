@@ -83,7 +83,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
         IndexRequest indexRequest = new IndexRequest(super.indexName.getIndexName())
                 .source(messageBytes, XContentType.JSON)
-                .type(super.indexType.getIndexType());
+                .type(super.documentType.getDocumentType());
 
         return indexRequest;
     }
@@ -92,7 +92,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         IndexRequest indexRequest = new IndexRequest(super.indexName.getIndexName())
                 .source(messageBytes, XContentType.JSON)
                 .id(id)
-                .type(super.indexType.getIndexType());
+                .type(super.documentType.getDocumentType());
 
         return indexRequest;
     }
@@ -103,7 +103,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     public DeleteResponse deleteById(String id) throws IOException {
         DeleteRequest deleteRequest = new DeleteRequest()
                 .index(super.indexName.getIndexName())
-                .type(super.indexType.getIndexType())
+                .type(super.documentType.getDocumentType())
                 .id(id);
 
         System.out.println(deleteRequest.toString());

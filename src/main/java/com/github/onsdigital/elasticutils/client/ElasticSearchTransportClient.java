@@ -72,7 +72,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     public SearchHits search(QueryBuilder qb, SearchType searchType) {
         SearchResponse searchResponse = this.client.prepareSearch()
                 .setIndices(this.indexName.getIndexName())
-                .setTypes(this.indexType.getIndexType())
+                .setTypes(this.documentType.getDocumentType())
                 .setSearchType(searchType)
                 .setQuery(qb)
                 .setExplain(true)
@@ -101,7 +101,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
         return this.client.prepareIndex()
                 .setIndex(super.indexName.getIndexName())
-                .setType(this.indexType.getIndexType())
+                .setType(this.documentType.getDocumentType())
                 .setSource(messageBytes, xContentType)
                 .request();
     }
@@ -113,7 +113,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
         // Synchronous
         DeleteRequest deleteRequest = new DeleteRequest()
                 .index(super.indexName.getIndexName())
-                .type(super.indexType.getIndexType())
+                .type(super.documentType.getDocumentType())
                 .id(id)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
 
