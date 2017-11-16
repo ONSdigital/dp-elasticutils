@@ -43,28 +43,11 @@ public class TestClient {
 
             GeoLocation testGeoLocation = new GeoLocation(ID_HTTP, 51.566407, -3.027560);  // ONS
 
-            IndexResponse indexResponse = searchClient.syncIndex(testGeoLocation);
+            IndexResponse indexResponse = searchClient.indexAndRefresh(testGeoLocation);
 
             searchClient.awaitClose(1, TimeUnit.SECONDS);
 
             assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
-        } catch (Exception e) {
-            Assert.fail("Exception in createTestIndex: " + e);
-        }
-    }
-
-    @Test
-    public void createTestIndexTcp() {
-        // Index some test data via http
-
-        try {
-            ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchTransportClient<GeoLocation>(
-                    HOSTNAME, ElasticIndex.TEST, GeoLocation.class
-            );
-
-            GeoLocation testGeoLocation = new GeoLocation(ID_TCP, 51.566407, -3.027560);  // ONS
-
-            searchClient.syncIndex(testGeoLocation);
         } catch (Exception e) {
             Assert.fail("Exception in createTestIndex: " + e);
         }
@@ -103,5 +86,23 @@ public class TestClient {
 
         assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
     }
+
+    @Test
+    public void createTestIndexTcp() {
+        // Index some test data via http
+
+        try {
+            ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchTransportClient<GeoLocation>(
+                    HOSTNAME, ElasticIndex.TEST, GeoLocation.class
+            );
+
+            GeoLocation testGeoLocation = new GeoLocation(ID_TCP, 51.566407, -3.027560);  // ONS
+
+            searchClient.indexAndRefresh(testGeoLocation);
+        } catch (Exception e) {
+            Assert.fail("Exception in createTestIndex: " + e);
+        }
+    }
+
 
 }

@@ -78,7 +78,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected abstract IndexResponse performSyncIndex(IndexRequest indexRequest) throws IOException;
 
-    public IndexResponse syncIndex(T entity) throws IOException {
+    public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
 
         if (messageBytes.isPresent()) {
