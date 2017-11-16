@@ -23,11 +23,13 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
+ *
+ * Series of tests to ensure indexing/searching/deletion is working for both the
+ * TCP and HTTP transport clients.
  */
 public class TestClient {
 
     private static final String HOSTNAME = "localhost";
-    private static final String TYPE = "DOCUMENT";
 
     private static final String ID_HTTP = "1";
     private static final String ID_TCP = "2";
@@ -49,7 +51,7 @@ public class TestClient {
 
             assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
         } catch (Exception e) {
-            Assert.fail("Exception in createTestIndex: " + e);
+            Assert.fail("Exception in createTestIndexHttp: " + e);
         }
     }
 
@@ -81,7 +83,7 @@ public class TestClient {
         try {
             deleteResponse = searchClient.deleteById(id);
         } catch (IOException e) {
-            Assert.fail("Exception in testHttpSearch: " + e);
+            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
         }
 
         assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
@@ -100,7 +102,7 @@ public class TestClient {
 
             searchClient.indexAndRefresh(testGeoLocation);
         } catch (Exception e) {
-            Assert.fail("Exception in createTestIndex: " + e);
+            Assert.fail("Exception in createTestIndexTcp: " + e);
         }
     }
 

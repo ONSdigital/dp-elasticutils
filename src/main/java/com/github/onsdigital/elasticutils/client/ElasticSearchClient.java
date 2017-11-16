@@ -26,7 +26,9 @@ import java.util.stream.Stream;
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
  *
- * Single class to expose index/search/delete APIs for both the HTTP and TCP clients
+ * Single class to expose index/search/delete APIs for both the HTTP and TCP clients.
+ * The idea is to reduce code duplication/maintenance when choosing between the
+ * HTTP or TCP transport layers.
  */
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
@@ -88,7 +90,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
             return indexResponse;
         } else {
-            throw new IOException("Unable to convert entity to byte array");
+            throw new IOException(String.format("Failed to convert entity %s to byte array", entity));
         }
     }
 

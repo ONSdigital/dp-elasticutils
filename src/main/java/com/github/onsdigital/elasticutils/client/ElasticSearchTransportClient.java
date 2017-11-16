@@ -23,6 +23,8 @@ import java.net.UnknownHostException;
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
+ *
+ * Implementation of Elasticsearch TCP client
  */
 public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 

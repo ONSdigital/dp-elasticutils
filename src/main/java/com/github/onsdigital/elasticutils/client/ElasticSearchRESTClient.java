@@ -21,6 +21,8 @@ import java.io.IOException;
 /**
  * @author sullid (David Sullivan) on 16/11/2017
  * @project dp-elasticutils
+ *
+ * Implementation of ElasticSearch REST client
  */
 public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 

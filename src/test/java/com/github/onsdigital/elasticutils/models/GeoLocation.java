@@ -3,6 +3,8 @@ package com.github.onsdigital.elasticutils.models;
 /**
  * @author sullid (David Sullivan) on 15/11/2017
  * @project dp-elasticutils
+ *
+ * Simple POJO to test Elasticsearch client
  */
 public class GeoLocation {
 
