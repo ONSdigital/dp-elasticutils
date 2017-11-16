@@ -52,6 +52,15 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         this.returnClass = returnClass;
     }
 
+    @Override
+    public void finalize() throws Throwable {
+        // Close the Client connection
+        this.close();
+
+        // Invoke super
+        super.finalize();
+    }
+
     // SEARCH //
 
     // This throws IOException due to the HTTP REST client
@@ -78,17 +87,15 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     // INDEX //
 
-    protected abstract IndexResponse executeIndexAndRefresh(IndexRequest indexRequest) throws IOException;
+    protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, WriteRequest.RefreshPolicy refreshPolicy) throws IOException;
 
     public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
 
         if (messageBytes.isPresent()) {
-            IndexRequest indexRequest = this.createIndexRequest(messageBytes.get())
-                    .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
-            IndexResponse indexResponse = this.executeIndexAndRefresh(indexRequest);
+            IndexRequest indexRequest = this.createIndexRequest(messageBytes.get());
 
-            return indexResponse;
+            return this.indexWithRefreshPolicy(indexRequest, WriteRequest.RefreshPolicy.WAIT_UNTIL);
         } else {
             throw new IOException(String.format("Failed to convert entity %s to byte array", entity));
         }

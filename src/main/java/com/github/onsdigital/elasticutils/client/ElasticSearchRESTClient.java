@@ -11,6 +11,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -65,7 +66,9 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexResponse executeIndexAndRefresh(IndexRequest indexRequest) throws IOException {
+    protected IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, WriteRequest.RefreshPolicy refreshPolicy) throws IOException {
+        indexRequest.setRefreshPolicy(refreshPolicy);
+
         IndexResponse indexResponse = this.client.index(indexRequest);
         return indexResponse;
     }

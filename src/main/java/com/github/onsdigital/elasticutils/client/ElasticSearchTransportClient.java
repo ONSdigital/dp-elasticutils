@@ -19,7 +19,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHits;
@@ -69,7 +68,6 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     public SearchHits search(QueryBuilder qb, SearchType searchType) {
-        // Here, we fix
         SearchResponse searchResponse = this.client.prepareSearch()
                 .setIndices(this.indexName.getIndexName())
                 .setTypes(this.indexType.getIndexType())
@@ -85,7 +83,9 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexResponse executeIndexAndRefresh(IndexRequest indexRequest) {
+    protected IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, WriteRequest.RefreshPolicy refreshPolicy) {
+        indexRequest.setRefreshPolicy(refreshPolicy);
+
         IndexResponse indexResponse = this.client.index(indexRequest).actionGet();
         return indexResponse;
     }

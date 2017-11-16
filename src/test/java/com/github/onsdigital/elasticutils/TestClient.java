@@ -59,6 +59,7 @@ public class TestClient {
     @Test
     public void testHttpIndexSearchAndDelete() {
         // Create
+
         createTestIndexHttp();
 
         ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
@@ -78,17 +79,18 @@ public class TestClient {
         assertEquals(1, geoLocations.size());
         assertEquals(ID_HTTP, geoLocations.get(0).getGeoId());
 
-        // Delete
-//        String id = hits.getAt(0).getId();
-//        DeleteResponse deleteResponse = null;
-//        try {
-//            deleteResponse = searchClient.deleteById(id);
-//        } catch (IOException e) {
-//            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
-//        }
-//
-//        assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
+        // Delete the record
+        String id = hits.getAt(0).getId();
+        DeleteResponse deleteResponse = null;
+        try {
+            deleteResponse = searchClient.deleteById(id);
+        } catch (IOException e) {
+            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
+        }
 
+        assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
+
+        // Delete the index
         Response response = null;
         try {
              response = searchClient.deleteIndex(ElasticIndex.TEST);
