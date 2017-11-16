@@ -27,10 +27,10 @@ public class ElasticSearchHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHelper.class);
 
-    private static final int DEFAULT_HTTP_PORT = 9200;
+    public static final int DEFAULT_HTTP_PORT = 9200;
 
-    private static final int DEFAULT_TCP_PORT = 9300;
-    private static final int DEFAULT_XPACK_TCP_PORT = 9301;
+    public static final int DEFAULT_TCP_PORT = 9300;
+    public static final int DEFAULT_XPACK_TCP_PORT = 9301;
 
     // HTTP
 
@@ -51,8 +51,12 @@ public class ElasticSearchHelper {
     // TCP
 
     public static TransportClient getTransportClient(String hostName) throws UnknownHostException {
+        return getTransportClient(hostName, DEFAULT_TCP_PORT);
+    }
+
+    public static TransportClient getTransportClient(String hostName, int transport_port) throws UnknownHostException {
         Settings defaultSettings = Settings.EMPTY;
-        return getTransportClient(hostName, defaultSettings);
+        return getTransportClient(hostName, transport_port, defaultSettings);
     }
 
     public static TransportClient getTransportClient(String hostName, Settings settings) throws UnknownHostException {

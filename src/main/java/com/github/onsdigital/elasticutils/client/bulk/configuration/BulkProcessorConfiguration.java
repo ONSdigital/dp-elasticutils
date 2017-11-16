@@ -8,6 +8,9 @@ import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOpti
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptionsBuilder;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.threadpool.ThreadPool;
 
 public class BulkProcessorConfiguration {
 
@@ -41,5 +44,23 @@ public class BulkProcessorConfiguration {
                 .setFlushInterval(options.getFlushInterval())
                 .setBackoffPolicy(options.getBackoffPolicy())
                 .build();
+    }
+
+    public BulkProcessor build(final RestHighLevelClient client) {
+        Settings defaultSettings = Settings.builder().put("node.name", "NodeScope").build();
+        return build(client, defaultSettings);
+    }
+
+    public BulkProcessor build(final RestHighLevelClient client, Settings settings) {
+        ThreadPool threadPool = new ThreadPool(settings);
+
+        LoggingBulkProcessorListener listener = new LoggingBulkProcessorListener();
+        BulkProcessor.Builder builder = new BulkProcessor.Builder(client::bulkAsync, listener, threadPool)
+                .setConcurrentRequests(options.getConcurrentRequests())
+                .setBulkActions(options.getBulkActions())
+                .setBulkSize(options.getBulkSize())
+                .setBackoffPolicy(options.getBackoffPolicy());
+
+        return builder.build();
     }
 }

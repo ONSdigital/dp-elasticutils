@@ -1,4 +1,4 @@
-package com.github.onsdigital.elasticutils.client;
+package com.github.onsdigital.elasticutils.engine;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

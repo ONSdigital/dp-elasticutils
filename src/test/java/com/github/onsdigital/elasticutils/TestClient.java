@@ -1,23 +1,20 @@
 package com.github.onsdigital.elasticutils;
 
+import com.github.onsdigital.elasticutils.client.ElasticSearchRESTClient;
+import com.github.onsdigital.elasticutils.client.ElasticSearchTransportClient;
 import com.github.onsdigital.elasticutils.index.ElasticIndex;
 import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
-import com.github.onsdigital.elasticutils.util.JsonUtils;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,37 +28,36 @@ public class TestClient {
     private static final String TYPE = "DOCUMENT";
 
     @Test
-    public void testTcpClientConnection() {
-        Client tcpClient = null;
+    public void testTcpClientConnection() throws InterruptedException {
+        ElasticSearchTransportClient client = null;
         try {
-             tcpClient = ElasticSearchHelper.getTransportClient(HOSTNAME);
+             client = new ElasticSearchTransportClient(HOSTNAME, ElasticSearchHelper.DEFAULT_TCP_PORT);
         } catch (UnknownHostException e) {
             Assert.fail("Exception: " + e);
         }
 
-        ClusterHealthResponse healthResponse = tcpClient.admin().cluster().prepareHealth().get();
+        ClusterHealthResponse healthResponse = client.admin().cluster().prepareHealth().get();
         int status = healthResponse.status().getStatus();
         assertEquals(HttpStatus.SC_OK, status);
-    }
-
-    @Test
-    public void testRestClientConnection() {
-        RestHighLevelClient restClient = ElasticSearchHelper.getRestClient(HOSTNAME);
-        ElasticIndex index = ElasticIndex.TEST;
 
         GeoLocation geoLocation = new GeoLocation(51.566407, -3.027560);  // ONS
 
-        Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(geoLocation);
-        if (messageBytes.isPresent()) {
-            IndexRequest request = createIndexRequest(index, messageBytes.get());
+        client.index(ElasticIndex.TEST, geoLocation);
 
-            try {
-                IndexResponse indexResponse = restClient.index(request);
-                assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
-            } catch (IOException e) {
-                Assert.fail("Exception: " + e);
-            }
-        }
+        // The Bulk Insert is asynchronous, we give ElasticSearch some time to do the insert:
+        client.awaitClose(1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void testRestClientConnection() throws InterruptedException {
+        ElasticSearchRESTClient client = new ElasticSearchRESTClient(HOSTNAME, ElasticSearchHelper.DEFAULT_HTTP_PORT);
+
+        GeoLocation geoLocation = new GeoLocation(51.566407, -3.027560);  // ONS
+
+        client.index(ElasticIndex.TEST, geoLocation);
+
+        // The Bulk Insert is asynchronous, we give ElasticSearch some time to do the insert:
+        client.awaitClose(1, TimeUnit.SECONDS);
     }
 
     public IndexRequest createIndexRequest(ElasticIndexNames indexNames, byte[] messageBytes) {
