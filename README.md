@@ -1,41 +1,77 @@
 dp-repo-template
 ================
 
-A template git repository for DP repos:
+### Description
 
-* Standardised files for CHANGELOG, CONTRIBUTING, LICENSE and README
-* Default template for GitHub pull requests
+A library for working with Elasticsearch 5.X and 6.X in Java. Implements both RESTful and TCP clients under a single easy to use API, with an option to pull a RESTful only version (restonly branch).
 
-### Getting started
+### Quickstart
 
-After creating a new repository on GitHub, use these commands to initialise
-it using this repository as a template:
+See the test directory (src/test/java/) to see an example on how to get started.
 
-* `git clone git@github.com:ONSdigital/dp-repo-template dp-new-repo-name`
-* `cd dp-new-repo-name`
-* `git remote set-url origin git@github.com:ONSdigital/dp-new-repo-name`
+Client connections via RESTful and TCP connections are straight forward:
 
-Remember to update the [README](README.md) and [CHANGELOG](CHANGELOG.md) files.
+```java
 
-### Configuration
+package com.github.onsdigital.elasticutils.models;
 
-An overview of the configuration options available, either as a table of
-environment variables, or with a link to a configuration guide.
+/**
+ * @author sullid (David Sullivan) on 15/11/2017
+ * @project dp-elasticutils
+ *
+ * Simple POJO to test Elasticsearch client
+ */
+public class GeoLocation {
 
-| Environment variable | Default | Description
-| -------------------- | ------- | -----------
-| BIND_ADDR            | :8080   | The host and port to bind to
+    private String geoId;
+
+    private double lat;
+
+    private double lon;
+
+    private GeoLocation() {}
+
+    public GeoLocation(String geoId, double lat, double lon) {
+        this.geoId = geoId;
+        this.lat = lat;
+        this.lon = lon;
+    }
+
+    public String getGeoId() {
+        return geoId;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+}
 
 
-### Notes
-REST client confirmed to work for ES 5.5.0
+// RESTful HTTP client
+ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
+        HOSTNAME, 9200, ElasticIndex.TEST, GeoLocation.class
+);
 
-### Contributing
+// TCP client
+ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchTransportClient<GeoLocation>(
+        HOSTNAME, 9300, ElasticIndex.TEST, GeoLocation.class
+);
+```
 
-See [CONTRIBUTING](CONTRIBUTING.md) for details.
+The ElasticSearchClient implements document indexing, search, and deletion.
 
-### License
+### Testing
 
-Copyright © 2016-2017, Office for National Statistics (https://www.ons.gov.uk)
+The RESTful client supports Elasticsearch 5.X and 6.0.0, while the TCP client supports 6.0.0 ONLY. To run the tests, launch the docker container:
 
-Released under MIT license, see [LICENSE](LICENSE.md) for details.
+'''bash
+docker-compose up
+mvn test
+docker-compose down
+'''
+
+Docker will launch containers for Elasticsearch 5.5.0 and Elasticsearch 6.0.0.
