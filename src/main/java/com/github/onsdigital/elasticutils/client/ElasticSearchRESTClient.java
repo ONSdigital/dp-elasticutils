@@ -3,6 +3,7 @@ package com.github.onsdigital.elasticutils.client;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
+import org.apache.http.HttpStatus;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -72,6 +73,15 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
         IndexResponse indexResponse = this.client.index(indexRequest);
         return indexResponse;
+    }
+
+    @Override
+    public boolean indexExists(ElasticIndexNames indexName) throws IOException {
+        Response response = this.getLowLevelClient().performRequest(
+                HttpRequestType.HEAD.getRequestType(), indexName.getIndexName()
+        );
+
+        return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
     }
 
     @Override
@@ -157,7 +167,8 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         GET("GET"),
         POST("POST"),
         PUT("PUT"),
-        DELETE("DELETE");
+        DELETE("DELETE"),
+        HEAD("HEAD");
 
         private String requestType;
 

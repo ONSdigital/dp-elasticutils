@@ -91,6 +91,8 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, RefreshPolicy refreshPolicy) throws IOException;
 
+    public abstract boolean indexExists(ElasticIndexNames indexName) throws IOException;
+
     public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
 
