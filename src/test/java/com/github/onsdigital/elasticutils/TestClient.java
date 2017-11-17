@@ -60,44 +60,50 @@ public class TestClient {
     public void testHttpIndexSearchAndDelete() {
         // Create
 
-        createTestIndexHttp();
+        for (Ports port : Ports.values()) {
 
-        ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
-                HOSTNAME, ElasticIndex.TEST, GeoLocation.class
-        );
+            System.out.println(String.format("Connecting to instance: %s", port));
 
-        // Search
-        QueryBuilder qb = QueryBuilders.matchQuery("geoId", ID_HTTP);
-        SearchHits hits = null;
-        try {
-            hits = searchClient.search(qb);
-        } catch (IOException e) {
-            Assert.fail("Exception in testHttpSearch: " + e);
-        }
-        List<GeoLocation> geoLocations = searchClient.deserialize(hits);
+            createTestIndexHttp();
 
-        assertEquals(1, geoLocations.size());
-        assertEquals(ID_HTTP, geoLocations.get(0).getGeoId());
+            ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
+                    HOSTNAME, port.getPort(), ElasticIndex.TEST, GeoLocation.class
+            );
 
-        // Delete the record
-        String id = hits.getAt(0).getId();
-        DeleteResponse deleteResponse = null;
-        try {
-            deleteResponse = searchClient.deleteById(id);
-        } catch (IOException e) {
-            Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
-        }
+            // Search
+            QueryBuilder qb = QueryBuilders.matchQuery("geoId", ID_HTTP);
+            SearchHits hits = null;
+            try {
+                hits = searchClient.search(qb);
+            } catch (IOException e) {
+                Assert.fail("Exception in testHttpSearch: " + e);
+            }
+            List<GeoLocation> geoLocations = searchClient.deserialize(hits);
 
-        assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
+            assertEquals(1, geoLocations.size());
+            assertEquals(ID_HTTP, geoLocations.get(0).getGeoId());
 
-        // Delete the index
-        Response response = null;
-        try {
-             response = searchClient.deleteIndex(ElasticIndex.TEST);
+            // Delete the record
+            String id = hits.getAt(0).getId();
+            DeleteResponse deleteResponse = null;
+            try {
+                deleteResponse = searchClient.deleteById(id);
+            } catch (IOException e) {
+                Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
+            }
 
-             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
-        } catch (IOException e) {
-            e.printStackTrace();
+            assertEquals(HttpStatus.SC_OK, deleteResponse.status().getStatus());
+
+            // Delete the index
+            Response response = null;
+            try {
+                response = searchClient.deleteIndex(ElasticIndex.TEST);
+
+                assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -115,6 +121,22 @@ public class TestClient {
             searchClient.indexAndRefresh(testGeoLocation);
         } catch (Exception e) {
             Assert.fail("Exception in createTestIndexTcp: " + e);
+        }
+    }
+
+
+    public enum Ports {
+        ES6(9200),
+        ES5(9205);
+
+        private int port;
+
+        Ports(int port) {
+            this.port = port;
+        }
+
+        public int getPort() {
+            return port;
         }
     }
 
