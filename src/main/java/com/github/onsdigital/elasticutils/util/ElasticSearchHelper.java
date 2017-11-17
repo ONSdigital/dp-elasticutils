@@ -5,7 +5,6 @@ import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOpti
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.transport.TransportClient;
@@ -37,8 +36,8 @@ public class ElasticSearchHelper {
     public static final int DEFAULT_TCP_PORT = 9300;
     public static final int DEFAULT_XPACK_TCP_PORT = 9301;
 
-    private static Map<String, RestHighLevelClient> httpConnectionMap;
-    private static Map<String, TransportClient> tcpConnectionMap;
+    private static Map<Host, RestHighLevelClient> httpConnectionMap;
+    private static Map<Host, TransportClient> tcpConnectionMap;
 
     static {
         httpConnectionMap = new ConcurrentHashMap<>();
@@ -53,9 +52,11 @@ public class ElasticSearchHelper {
 
     public static RestHighLevelClient getRestClient(String hostName, int http_port) {
 
+        Host host = new Host(hostName, http_port);
+
         if(!httpConnectionMap.containsKey(hostName)) {
 
-            LOGGER.info("Attempting to make HTTP connection to ES database at host {}", hostName);
+            LOGGER.info("Attempting to make HTTP connection to ES database: {} {}", hostName, http_port);
 
             // Set some basic headers for all requests
             BasicHeader[] headers = { new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json") };
@@ -66,13 +67,13 @@ public class ElasticSearchHelper {
                     ).setDefaultHeaders(headers)
             );
 
-            httpConnectionMap.put(hostName, client);
+            httpConnectionMap.put(host, client);
 
-            LOGGER.info("Successfully made HTTP connection to ES database at host {}", hostName);
+            LOGGER.info("Successfully made HTTP connection to ES database: {} {}", hostName, http_port);
 
         }
 
-        return httpConnectionMap.get(hostName);
+        return httpConnectionMap.get(host);
     }
 
     // TCP
@@ -86,11 +87,9 @@ public class ElasticSearchHelper {
         return getTransportClient(hostName, transport_port, defaultSettings);
     }
 
-    public static TransportClient getTransportClient(String hostName, Settings settings) throws UnknownHostException {
-        return getTransportClient(hostName, DEFAULT_TCP_PORT, settings);
-    }
-
     public static TransportClient getTransportClient(String hostName, int transport_port, Settings settings) throws UnknownHostException {
+
+        Host host = new Host(hostName, transport_port);
 
         if(!tcpConnectionMap.containsKey(hostName)) {
 
@@ -100,14 +99,14 @@ public class ElasticSearchHelper {
             TransportClient transportClient = new PreBuiltTransportClient(settings)
                     .addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), transport_port));
 
-            tcpConnectionMap.put(hostName, transportClient);
+            tcpConnectionMap.put(host, transportClient);
 
             if (LOGGER.isInfoEnabled())
                 LOGGER.info(String.format("Successfully made connection to ES db %s", hostName));
 
         }
 
-        return tcpConnectionMap.get(hostName);
+        return tcpConnectionMap.get(host);
     }
 
     public static TransportClient getXpackTransportClient(String hostName) throws UnknownHostException {
@@ -116,14 +115,15 @@ public class ElasticSearchHelper {
                 .put("cluster.name", "elasticsearch")
                 .put("xpack.security.user", "elastic:changeme")
                 .build();
-        return settings(hostName, defaultSettings);
+        return getXpackTransportClient(hostName, defaultSettings);
     }
 
-    public static TransportClient settings(String hostName, Settings settings) throws UnknownHostException {
-        return settings(hostName, DEFAULT_TCP_PORT, DEFAULT_XPACK_TCP_PORT, settings);
+    public static TransportClient getXpackTransportClient(String hostName, Settings settings) throws UnknownHostException {
+        return getXpackTransportClient(hostName, DEFAULT_TCP_PORT, DEFAULT_XPACK_TCP_PORT, settings);
     }
 
-    public static TransportClient settings(String hostName, int transport_port, int xpack_transport_port, Settings settings) throws UnknownHostException {
+    public static TransportClient getXpackTransportClient(String hostName, int transport_port, int xpack_transport_port, Settings settings) throws UnknownHostException {
+        // Don't cache an x-pack client, force re-authentication
         if(LOGGER.isInfoEnabled()) LOGGER.info(String.format("Attempting to make connection to X-pack enabled ES db %s", hostName));
 
         TransportClient transportClient = new PreBuiltXPackTransportClient(settings)
@@ -178,4 +178,42 @@ public class ElasticSearchHelper {
         }
     }
 
+}
+
+class Host {
+
+    private String hostName;
+    private int port;
+
+    public Host(String hostName, int port) {
+        this.hostName = hostName;
+        this.port = port;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean equals(Object otherObject) {
+        if (otherObject instanceof Host) {
+            Host otherHost = (Host) otherObject;
+
+            return (this.getHostName().equals(otherHost.getHostName()) && this.getPort() == otherHost.getPort());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return new StringBuilder(this.getHostName())
+                .append(":")
+                .append(this.getPort())
+                .toString().hashCode();
+    }
 }

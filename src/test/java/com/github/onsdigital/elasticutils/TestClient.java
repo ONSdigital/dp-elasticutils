@@ -36,39 +36,29 @@ public class TestClient {
     private static final String ID_TCP = "2";
 
     @Test
-    public void createTestIndexHttp() {
-        // Index some test data via http
-
-        try {
-            ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
-                    HOSTNAME, ElasticIndex.TEST, GeoLocation.class
-            );
-
-            GeoLocation testGeoLocation = new GeoLocation(ID_HTTP, 51.566407, -3.027560);  // ONS
-
-            IndexResponse indexResponse = searchClient.indexAndRefresh(testGeoLocation);
-
-            searchClient.awaitClose(1, TimeUnit.SECONDS);
-
-            assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
-        } catch (Exception e) {
-            Assert.fail("Exception in createTestIndexHttp: " + e);
-        }
-    }
-
-    @Test
     public void testHttpIndexSearchAndDelete() {
-        // Create
 
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
 
             System.out.println(String.format("Connecting to instance: %s", port));
 
-            createTestIndexHttp();
-
             ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
                     HOSTNAME, port.getPort(), ElasticIndex.TEST, GeoLocation.class
             );
+
+            // Index
+
+            try {
+                GeoLocation testGeoLocation = new GeoLocation(ID_HTTP, 51.566407, -3.027560);  // ONS
+
+                IndexResponse indexResponse = searchClient.indexAndRefresh(testGeoLocation);
+
+                searchClient.awaitClose(1, TimeUnit.SECONDS);
+
+                assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
+            } catch (Exception e) {
+                Assert.fail("Exception in createTestIndexHttp: " + e);
+            }
 
             // Search
             QueryBuilder qb = QueryBuilders.matchQuery("geoId", ID_HTTP);
@@ -126,8 +116,8 @@ public class TestClient {
 
 
     public enum ElasticSearchPort {
-        ES6(9200),
-        ES5(9205);
+        ElasticSearch_6_0_0(9200),
+        ElasticSearch_5_5_0(9205);
 
         private int port;
 
