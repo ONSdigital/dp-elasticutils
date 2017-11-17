@@ -64,13 +64,32 @@ ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchTransportClient
 
 The ElasticSearchClient implements document indexing, search, and deletion.
 
+### Maven dependency
+
+The RESTful client supports Elasticsearch 5.X and 6.0.0, while the TCP client supports 6.0.0 ONLY. Docker will launch containers for Elasticsearch 5.5.0 and Elasticsearch 6.0.0 using the docker-compose.yml file provided.
+
+To install, simply:
+
+------
+	docker-compose up
+	mvn install
+	docker-compose down
+
+The maven dependency is:
+
+```xml
+    <dependency>
+        <groupId>com.github.ONSdigital</groupId>
+        <artifactId>dp-elasticutils</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+```
+
 ### Testing
 
-The RESTful client supports Elasticsearch 5.X and 6.0.0, while the TCP client supports 6.0.0 ONLY. To run the tests, launch the docker container:
+To run the tests, launch the docker container:
 
 ------
 	docker-compose up
 	mvn test
 	docker-compose down
-
-Docker will launch containers for Elasticsearch 5.5.0 and Elasticsearch 6.0.0.
