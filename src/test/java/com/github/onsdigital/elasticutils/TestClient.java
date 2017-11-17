@@ -60,7 +60,7 @@ public class TestClient {
     public void testHttpIndexSearchAndDelete() {
         // Create
 
-        for (Ports port : Ports.values()) {
+        for (ElasticSearchPort port : ElasticSearchPort.values()) {
 
             System.out.println(String.format("Connecting to instance: %s", port));
 
@@ -125,13 +125,13 @@ public class TestClient {
     }
 
 
-    public enum Ports {
+    public enum ElasticSearchPort {
         ES6(9200),
         ES5(9205);
 
         private int port;
 
-        Ports(int port) {
+        ElasticSearchPort(int port) {
             this.port = port;
         }
 
