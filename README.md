@@ -68,10 +68,9 @@ The ElasticSearchClient implements document indexing, search, and deletion.
 
 The RESTful client supports Elasticsearch 5.X and 6.0.0, while the TCP client supports 6.0.0 ONLY. To run the tests, launch the docker container:
 
-'''bash
-docker-compose up
-mvn test
-docker-compose down
-'''
+------
+	docker-compose up
+	mvn test
+	docker-compose down
 
 Docker will launch containers for Elasticsearch 5.5.0 and Elasticsearch 6.0.0.
