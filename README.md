@@ -1,4 +1,4 @@
-dp-repo-template
+dp-elasticutils
 ================
 
 ### Description
