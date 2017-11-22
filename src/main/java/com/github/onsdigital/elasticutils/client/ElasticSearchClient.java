@@ -13,6 +13,8 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,6 +54,9 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         this.indexName = indexName;
         this.bulkProcessorConfiguration = bulkProcessorConfiguration;
         this.returnClass = returnClass;
+
+        // Ensure the client is closed properly on shutdown
+        Runtime.getRuntime().addShutdownHook(new ShutDownThread(this));
     }
 
     @Override
@@ -162,6 +167,28 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
         public String getDocumentType() {
             return documentType;
+        }
+    }
+
+    private static class ShutDownThread extends Thread {
+
+        private final Logger LOGGER = LoggerFactory.getLogger(ShutDownThread.class);
+
+        private ElasticSearchClient client;
+
+        public ShutDownThread(ElasticSearchClient client) {
+            this.client = client;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("Shutting down ElasticSearchClient");
+                client.close();
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("Successfully shut down ElasticSearchClient");
+            } catch (Exception e) {
+                LOGGER.error("Unable to close ElasticSearchClient", e);
+            }
         }
     }
 
