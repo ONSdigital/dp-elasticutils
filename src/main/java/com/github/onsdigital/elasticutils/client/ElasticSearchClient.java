@@ -36,6 +36,8 @@ import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
  */
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchClient.class);
+
     protected DocumentType documentType = DocumentType.DOCUMENT;
 
     protected final String hostName;
@@ -130,9 +132,17 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
                 .forEach(bulkProcessor::add);
     }
 
+    public abstract IndexRequest createIndexRequest(byte[] messageBytes);
+
+    public abstract IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType);
+
+    protected abstract BulkProcessor getBulkProcessor();
+
     // DELETE //
 
     public abstract DeleteResponse deleteById(String id) throws IOException;
+
+    // CLOSE //
 
     @Override
     public void flush() {
@@ -148,13 +158,9 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         this.getBulkProcessor().close();
     }
 
-    public abstract IndexRequest createIndexRequest(byte[] messageBytes);
-
-    public abstract IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType);
+    // MISC //
 
     public abstract ElasticSearchHelper.ClientType getClientType();
-
-    protected abstract BulkProcessor getBulkProcessor();
 
     public enum DocumentType {
         DOCUMENT("document");
