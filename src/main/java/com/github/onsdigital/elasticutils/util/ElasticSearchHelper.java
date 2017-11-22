@@ -54,7 +54,7 @@ public class ElasticSearchHelper {
 
         Host host = new Host(hostName, http_port);
 
-        if(!httpConnectionMap.containsKey(hostName)) {
+        if(!httpConnectionMap.containsKey(host)) {
 
             LOGGER.info("Attempting to make HTTP connection to ES database: {} {}", hostName, http_port);
 
@@ -91,7 +91,7 @@ public class ElasticSearchHelper {
 
         Host host = new Host(hostName, transport_port);
 
-        if(!tcpConnectionMap.containsKey(hostName)) {
+        if(!tcpConnectionMap.containsKey(host)) {
 
             if (LOGGER.isInfoEnabled())
                 LOGGER.info(String.format("Attempting to make TCP connection to ES db %s", hostName));
@@ -107,15 +107,6 @@ public class ElasticSearchHelper {
         }
 
         return tcpConnectionMap.get(host);
-    }
-
-    public static TransportClient getXpackTransportClient(String hostName) throws UnknownHostException {
-        // Default x-pack settings
-        Settings defaultSettings = Settings.builder()
-                .put("cluster.name", "elasticsearch")
-                .put("xpack.security.user", "elastic:changeme")
-                .build();
-        return getXpackTransportClient(hostName, defaultSettings);
     }
 
     public static TransportClient getXpackTransportClient(String hostName, Settings settings) throws UnknownHostException {
@@ -180,21 +171,21 @@ public class ElasticSearchHelper {
 
 }
 
-class Host {
+final class Host {
 
-    private String hostName;
-    private int port;
+    private final String hostName;
+    private final int port;
 
     public Host(String hostName, int port) {
         this.hostName = hostName;
         this.port = port;
     }
 
-    public String getHostName() {
+    public final String getHostName() {
         return hostName;
     }
 
-    public int getPort() {
+    public final int getPort() {
         return port;
     }
 
@@ -211,9 +202,6 @@ class Host {
 
     @Override
     public int hashCode() {
-        return new StringBuilder(this.getHostName())
-                .append(":")
-                .append(this.getPort())
-                .toString().hashCode();
+        return (this.getHostName() + ":" + this.getPort()).hashCode();
     }
 }
