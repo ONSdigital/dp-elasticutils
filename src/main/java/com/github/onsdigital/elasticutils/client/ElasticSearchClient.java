@@ -2,7 +2,6 @@ package com.github.onsdigital.elasticutils.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
-import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import com.github.onsdigital.elasticutils.util.JsonUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -45,13 +44,13 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected final String hostName;
     protected final int port;
-    protected final ElasticIndexNames indexName;
+    protected final String indexName;
     protected final BulkProcessorConfiguration bulkProcessorConfiguration;
     protected Class<T> returnClass;
 
     private static ObjectMapper MAPPER = new ObjectMapper();
 
-    public ElasticSearchClient(String hostName, int port, ElasticIndexNames indexName,
+    public ElasticSearchClient(String hostName, int port, String indexName,
                                BulkProcessorConfiguration bulkProcessorConfiguration,
                                Class<T> returnClass) {
         this.hostName = hostName;
@@ -107,7 +106,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, RefreshPolicy refreshPolicy) throws IOException;
 
-    public abstract boolean indexExists(ElasticIndexNames indexName) throws IOException;
+    public abstract boolean indexExists(String indexName) throws IOException;
 
     public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);

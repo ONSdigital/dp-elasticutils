@@ -1,7 +1,6 @@
 package com.github.onsdigital.elasticutils.client;
 
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
-import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -36,17 +35,17 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     private RestHighLevelClient client;
     private BulkProcessor bulkProcessor;
 
-    public ElasticSearchRESTClient(String hostName, ElasticIndexNames indexName, Class<T> returnClass) {
+    public ElasticSearchRESTClient(String hostName, String indexName, Class<T> returnClass) {
         this(hostName, ElasticSearchHelper.DEFAULT_HTTP_PORT, indexName,
                 ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
     }
 
-    public ElasticSearchRESTClient(String hostName, int http_port, ElasticIndexNames indexName, Class<T> returnClass) {
+    public ElasticSearchRESTClient(String hostName, int http_port, String indexName, Class<T> returnClass) {
         this(hostName, http_port, indexName,
                 ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
     }
 
-    public ElasticSearchRESTClient(String hostName, int http_port, ElasticIndexNames indexName,
+    public ElasticSearchRESTClient(String hostName, int http_port, String indexName,
                                    final BulkProcessorConfiguration bulkProcessorConfiguration, Class<T> returnClass) {
         super(hostName, http_port, indexName, bulkProcessorConfiguration, returnClass);
         this.client = ElasticSearchHelper.getRestClient(super.hostName, super.port);
@@ -65,7 +64,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
                 .query(qb);
 
-        SearchRequest searchRequest = new SearchRequest(this.indexName.getIndexName())
+        SearchRequest searchRequest = new SearchRequest(this.indexName)
                 .source(sourceBuilder)
                 .searchType(searchType);
 
@@ -85,9 +84,9 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean indexExists(ElasticIndexNames indexName) throws IOException {
+    public boolean indexExists(String indexName) throws IOException {
         Response response = this.getLowLevelClient().performRequest(
-                HttpRequestType.HEAD.getRequestType(), indexName.getIndexName()
+                HttpRequestType.HEAD.getRequestType(), indexName
         );
 
         return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
@@ -100,7 +99,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
     @Override
     public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
-        IndexRequest indexRequest = new IndexRequest(super.indexName.getIndexName())
+        IndexRequest indexRequest = new IndexRequest(super.indexName)
                 .source(messageBytes, XContentType.JSON)
                 .type(super.documentType.getDocumentType());
 
@@ -108,7 +107,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     }
 
     public IndexRequest createIndexRequest(String id, byte[] messageBytes, XContentType xContentType) {
-        IndexRequest indexRequest = new IndexRequest(super.indexName.getIndexName())
+        IndexRequest indexRequest = new IndexRequest(super.indexName)
                 .source(messageBytes, XContentType.JSON)
                 .id(id)
                 .type(super.documentType.getDocumentType());
@@ -121,7 +120,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     @Override
     public DeleteResponse deleteById(String id) throws IOException {
         DeleteRequest deleteRequest = new DeleteRequest()
-                .index(super.indexName.getIndexName())
+                .index(super.indexName)
                 .type(super.documentType.getDocumentType())
                 .id(id);
 
@@ -131,7 +130,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return deleteResponse;
     }
 
-    public Response deleteIndex(ElasticIndexNames indexName) throws IOException {
+    public Response deleteIndex(String indexName) throws IOException {
         /*
         Uses the low-level API to make a DELETE request against an entire index.
          */
@@ -144,8 +143,8 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return response;
     }
 
-    public static String getIndexEndPoint(ElasticIndexNames indexName) {
-        return "/" + indexName.getIndexName();
+    public static String getIndexEndPoint(String indexName) {
+        return "/" + indexName;
     }
 
     // ADMIN //

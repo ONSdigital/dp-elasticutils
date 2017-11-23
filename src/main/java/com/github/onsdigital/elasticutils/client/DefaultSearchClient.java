@@ -1,7 +1,5 @@
 package com.github.onsdigital.elasticutils.client;
 
-import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;

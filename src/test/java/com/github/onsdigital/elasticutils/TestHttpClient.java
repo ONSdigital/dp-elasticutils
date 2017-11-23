@@ -2,18 +2,17 @@ package com.github.onsdigital.elasticutils;
 
 import com.github.onsdigital.elasticutils.client.ElasticSearchClient;
 import com.github.onsdigital.elasticutils.client.ElasticSearchRESTClient;
-import com.github.onsdigital.elasticutils.client.ElasticSearchTransportClient;
-import com.github.onsdigital.elasticutils.index.ElasticIndex;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
 import org.apache.http.HttpStatus;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class TestHttpClient {
 
     private ElasticSearchRESTClient<GeoLocation> getClient(ElasticSearchPort port) {
         ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
-                HOSTNAME, port.getPort(), ElasticIndex.TEST, GeoLocation.class
+                HOSTNAME, port.getPort(), ElasticIndex.TEST.getIndexName(), GeoLocation.class
         );
         return searchClient;
     }
@@ -118,7 +117,7 @@ public class TestHttpClient {
             try {
                 ElasticSearchRESTClient<GeoLocation> searchClient = getClient(port);
 
-                response = searchClient.deleteIndex(ElasticIndex.TEST);
+                response = searchClient.deleteIndex(ElasticIndex.TEST.getIndexName());
                 assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             } catch (IOException e) {
                 Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
@@ -142,6 +141,20 @@ public class TestHttpClient {
 
         public int getPort() {
             return port;
+        }
+    }
+
+    public enum ElasticIndex {
+        TEST("test");
+
+        private String indexName;
+
+        ElasticIndex(String indexName) {
+            this.indexName = indexName;
+        }
+
+        public String getIndexName() {
+            return indexName;
         }
     }
 

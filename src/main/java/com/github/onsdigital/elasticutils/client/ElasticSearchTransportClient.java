@@ -1,7 +1,6 @@
 package com.github.onsdigital.elasticutils.client;
 
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
-import com.github.onsdigital.elasticutils.indicies.ElasticIndexNames;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -46,20 +45,20 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     private final Client client;
     private final BulkProcessor bulkProcessor;
 
-    public ElasticSearchTransportClient(String hostName, ElasticIndexNames indexName, Class<T> returnClass) throws UnknownHostException {
+    public ElasticSearchTransportClient(String hostName, String indexName, Class<T> returnClass) throws UnknownHostException {
         this(hostName, ElasticSearchHelper.DEFAULT_TCP_PORT, indexName, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Class<T> returnClass) throws UnknownHostException {
+    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Class<T> returnClass) throws UnknownHostException {
         this(hostName, transport_port, indexName, Settings.EMPTY, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Settings settings, Class<T> returnClass) throws UnknownHostException {
+    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Settings settings, Class<T> returnClass) throws UnknownHostException {
         this(hostName, transport_port, indexName, settings, ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
 
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, ElasticIndexNames indexName, Settings settings,
+    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Settings settings,
                                         BulkProcessorConfiguration bulkProcessorConfiguration, Class<T> returnClass) throws UnknownHostException {
         super(hostName, transport_port, indexName, bulkProcessorConfiguration, returnClass);
         this.client = ElasticSearchHelper.getTransportClient(super.hostName, super.port, settings);
@@ -76,7 +75,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     @Override
     public SearchHits search(QueryBuilder qb, SearchType searchType) {
         SearchResponse searchResponse = this.client.prepareSearch()
-                .setIndices(this.indexName.getIndexName())
+                .setIndices(this.indexName)
                 .setTypes(this.documentType.getDocumentType())
                 .setSearchType(searchType)
                 .setQuery(qb)
@@ -98,8 +97,8 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean indexExists(ElasticIndexNames indexName) {
-        IndicesExistsRequest request = new IndicesExistsRequest(indexName.getIndexName());
+    public boolean indexExists(String indexName) {
+        IndicesExistsRequest request = new IndicesExistsRequest(indexName);
 
         IndicesExistsResponse response = this.admin().indices().exists(request).actionGet();
         return response.isExists();
@@ -113,7 +112,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     @Override
     public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
         return this.client.prepareIndex()
-                .setIndex(super.indexName.getIndexName())
+                .setIndex(super.indexName)
                 .setType(this.documentType.getDocumentType())
                 .setSource(messageBytes, xContentType)
                 .request();
@@ -125,7 +124,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     public DeleteResponse deleteById(String id) {
         // Synchronous
         DeleteRequest deleteRequest = new DeleteRequest()
-                .index(super.indexName.getIndexName())
+                .index(super.indexName)
                 .type(super.documentType.getDocumentType())
                 .id(id)
                 .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
@@ -137,7 +136,7 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     public void deleteByQuery(QueryBuilder qb) {
         DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                 .filter(qb)
-                .source(super.indexName.getIndexName())
+                .source(super.indexName)
                 .execute(new ActionListener<BulkByScrollResponse>() {
                     @Override
                     public void onResponse(BulkByScrollResponse response) {
@@ -152,9 +151,9 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     // Requires the admin cluster. Currently only implemented for the TCP client
-    public DeleteIndexResponse deleteIndex(ElasticIndexNames indexName) {
+    public DeleteIndexResponse deleteIndex(String indexName) {
         DeleteIndexResponse deleteIndexResponse = this.admin().indices().delete(
-                new DeleteIndexRequest(indexName.getIndexName())
+                new DeleteIndexRequest(indexName)
         ).actionGet();
         return deleteIndexResponse;
     }
