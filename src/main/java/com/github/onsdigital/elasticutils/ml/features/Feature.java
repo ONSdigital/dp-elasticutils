@@ -1,6 +1,7 @@
 package com.github.onsdigital.elasticutils.ml.features;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class Feature {
         return params;
     }
 
+    @JsonProperty("template_language")
     public String getTemplateLanguage() {
         return templateLanguage;
     }
