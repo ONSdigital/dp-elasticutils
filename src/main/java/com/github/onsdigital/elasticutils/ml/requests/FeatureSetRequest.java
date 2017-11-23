@@ -72,7 +72,7 @@ public class FeatureSetRequest {
         return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(this);
     }
 
-    private static class FeatureSetRequestBuilder {
+    public static class FeatureSetRequestBuilder {
         @JsonIgnore
         private FeatureSetRequest request = new FeatureSetRequest();
 
@@ -93,33 +93,6 @@ public class FeatureSetRequest {
             return this.request;
         }
 
-    }
-
-    public static void main(String[] args) throws IOException {
-        Map<String, String> templateMatch = new HashMap<String, String>() {{
-            put("title", "{{keywords}}");
-        }};
-        Template template = new Template(templateMatch);
-
-        List<String> params = new ArrayList<String>() {{
-            add("keywords");
-        }};
-        Feature feature = new Feature("title_query", params, template);
-
-        List<Feature> featureList = new ArrayList<Feature>() {{
-            add(feature);
-        }};
-
-        FeatureSet featureSet = new FeatureSet("java_test_feature_set", featureList);
-
-        FeatureSetRequest request = FeatureSetRequest.builder().featureSet(featureSet).build();
-
-        ElasticSearchLtrRESTClient client = new ElasticSearchLtrRESTClient("localhost", Object.class);
-        Response response = client.addFeatureSet(request);
-        System.out.println(response);
-
-        Response deleteResponse = client.deleteFeatureSet(request);
-        System.out.println(deleteResponse);
     }
 
 }
