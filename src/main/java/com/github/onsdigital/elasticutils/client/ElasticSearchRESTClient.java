@@ -12,6 +12,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -55,11 +56,19 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     // SEARCH //
 
     @Override
-    public SearchHits search(QueryBuilder qb) throws IOException {
+    public SearchResponse search(SearchRequest searchRequest) throws IOException {
+        return this.client.search(searchRequest);
+    }
+
+    @Override
+    public SearchHits search(QueryBuilder qb, SearchType searchType) throws IOException {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
                 .query(qb);
 
-        SearchRequest searchRequest = new SearchRequest(this.indexName.getIndexName()).source(sourceBuilder);
+        SearchRequest searchRequest = new SearchRequest(this.indexName.getIndexName())
+                .source(sourceBuilder)
+                .searchType(searchType);
+
         SearchResponse searchResponse = this.client.search(searchRequest);
 
         return searchResponse.getHits();

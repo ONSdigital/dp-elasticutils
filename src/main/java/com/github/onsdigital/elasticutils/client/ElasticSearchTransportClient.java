@@ -13,6 +13,7 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.support.WriteRequest;
@@ -27,6 +28,7 @@ import org.elasticsearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.UnknownHostException;
 
 import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
@@ -67,10 +69,11 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     // SEARCH //
 
     @Override
-    public SearchHits search(QueryBuilder qb) {
-        return search(qb, SearchType.DFS_QUERY_THEN_FETCH);
+    public SearchResponse search(SearchRequest searchRequest) throws IOException {
+        return this.client.search(searchRequest).actionGet();
     }
 
+    @Override
     public SearchHits search(QueryBuilder qb, SearchType searchType) {
         SearchResponse searchResponse = this.client.prepareSearch()
                 .setIndices(this.indexName.getIndexName())

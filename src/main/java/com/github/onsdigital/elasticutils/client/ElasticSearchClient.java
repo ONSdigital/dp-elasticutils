@@ -9,6 +9,9 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -73,7 +76,13 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     // SEARCH //
 
     // This throws IOException due to the HTTP REST client
-    public abstract SearchHits search(QueryBuilder qb) throws IOException;
+    public SearchHits search(QueryBuilder qb) throws IOException {
+        return search(qb, SearchType.DFS_QUERY_THEN_FETCH);
+    }
+
+    public abstract SearchHits search(QueryBuilder qb, SearchType searchType) throws IOException;
+
+    public abstract SearchResponse search(SearchRequest searchRequest) throws IOException;
 
     public List<T> searchAndDeserialize(QueryBuilder qb) throws IOException {
         SearchHits searchHits = search(qb);
