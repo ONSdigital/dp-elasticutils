@@ -96,7 +96,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
             try {
                 results.add(MAPPER.readValue(hit.getSourceAsString(), returnClass));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.error("Error unmarshalling from json", e);
             }
         });
 
