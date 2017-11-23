@@ -5,17 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.onsdigital.elasticutils.ml.client.ElasticSearchLtrRESTClient;
-import com.github.onsdigital.elasticutils.ml.features.Feature;
 import com.github.onsdigital.elasticutils.ml.features.FeatureSet;
-import com.github.onsdigital.elasticutils.ml.features.Template;
-import org.elasticsearch.client.Response;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author sullid (David Sullivan) on 23/11/2017
@@ -32,7 +22,7 @@ public class FeatureSetRequest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private FeatureSetRequest() {
-
+        // For Jackson
     }
 
     public FeatureSetRequest(FeatureSet featureSet) {

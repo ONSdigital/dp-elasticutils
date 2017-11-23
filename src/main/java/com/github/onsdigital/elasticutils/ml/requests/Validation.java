@@ -16,6 +16,10 @@ public class Validation {
         this.index = index;
     }
 
+    private Validation() {
+        // For Jackson
+    }
+
     public Map<String, String> getParams() {
         return params;
     }

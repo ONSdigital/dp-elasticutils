@@ -32,6 +32,10 @@ public class Feature {
         this.template = template;
     }
 
+    private Feature() {
+        // For Jackson
+    }
+
     public String getName() {
         return name;
     }

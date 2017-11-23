@@ -26,6 +26,10 @@ public class FeatureSet {
         this.featureList = featureList;
     }
 
+    private FeatureSet() {
+        // For Jackson
+    }
+
     public String getName() {
         return name;
     }
