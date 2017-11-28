@@ -228,8 +228,8 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        ElasticSearchClient client = new ElasticSearchRESTClient("localhost", "movies", Object.class);
-//        ElasticSearchClient client = new ElasticSearchTransportClient("localhost", "movies", Object.class);
+//        ElasticSearchClient client = new ElasticSearchRESTClient("localhost", "movies", Object.class);
+        ElasticSearchClient client = new ElasticSearchTransportClient("localhost", "movies", Object.class);
 
         Settings settings = Settings.builder().put("refresh_interval", "1s").build();
 
