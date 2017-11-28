@@ -1,8 +1,12 @@
 package com.github.onsdigital.elasticutils.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.entity.ContentType;
+import org.apache.http.nio.entity.NStringEntity;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -15,12 +19,15 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy;
 
@@ -34,6 +41,8 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
     private RestHighLevelClient client;
     private BulkProcessor bulkProcessor;
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public ElasticSearchRESTClient(String hostName, String indexName, Class<T> returnClass) {
         this(hostName, ElasticSearchHelper.DEFAULT_HTTP_PORT, indexName,
@@ -85,11 +94,13 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
     @Override
     public boolean indexExists(String indexName) throws IOException {
-        Response response = this.getLowLevelClient().performRequest(
-                HttpRequestType.HEAD.getRequestType(), indexName
-        );
+        try (RestClient lowLevelClient = this.getLowLevelClient()) {
+            Response response = lowLevelClient.performRequest(
+                    HttpRequestType.HEAD.getRequestType(), indexName
+            );
 
-        return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+            return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+        }
     }
 
     @Override
@@ -115,6 +126,23 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return indexRequest;
     }
 
+    @Override
+    public boolean updateIndexSettings(Settings settings) throws IOException {
+        Map<String, String> settingsMap = settings.getAsMap();
+
+        try (RestClient lowLevelClient = this.getLowLevelClient()) {
+
+            String json = MAPPER.writeValueAsString(settingsMap);
+            HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
+
+            String api = getIndexEndPoint(super.indexName) + "/_settings";
+            Response response = lowLevelClient.performRequest(HttpRequestType.PUT.getRequestType(), api, Collections.<String, String>emptyMap(),
+                    entity);
+
+            return (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+        }
+    }
+
     // DELETE //
 
     @Override
@@ -123,8 +151,6 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
                 .index(super.indexName)
                 .type(super.documentType.getDocumentType())
                 .id(id);
-
-        System.out.println(deleteRequest.toString());
 
         DeleteResponse deleteResponse = this.client.delete(deleteRequest);
         return deleteResponse;
@@ -136,11 +162,13 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
          */
         String endPoint = getIndexEndPoint(indexName);
 
-        Response response = this.getLowLevelClient().performRequest(
-                HttpRequestType.DELETE.getRequestType(), endPoint
-        );
+        try (RestClient lowLevelClient = this.getLowLevelClient()) {
+            Response response = lowLevelClient.performRequest(
+                    HttpRequestType.DELETE.getRequestType(), endPoint
+            );
 
-        return response;
+            return response;
+        }
     }
 
     public static String getIndexEndPoint(String indexName) {
@@ -162,6 +190,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return this.client;
     }
 
+    // Use the low-level client with care, and ALWAYS within a try with resource block (see above)
     public RestClient getLowLevelClient() {
         return this.client.getLowLevelClient();
     }

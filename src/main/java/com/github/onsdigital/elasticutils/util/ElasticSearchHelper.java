@@ -6,6 +6,7 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -52,7 +53,7 @@ public class ElasticSearchHelper {
 
     public static RestHighLevelClient getRestClient(String hostName, int http_port) {
 
-        Host host = new Host(hostName, http_port);
+        Host host = new Host(hostName, new int[] {http_port});
 
         if(!httpConnectionMap.containsKey(host)) {
 
@@ -79,27 +80,37 @@ public class ElasticSearchHelper {
     // TCP
 
     public static TransportClient getTransportClient(String hostName) throws UnknownHostException {
-        return getTransportClient(hostName, DEFAULT_TCP_PORT);
+        return getTransportClient(hostName, new int[] {DEFAULT_TCP_PORT});
     }
 
     public static TransportClient getTransportClient(String hostName, int transport_port) throws UnknownHostException {
-        Settings defaultSettings = Settings.EMPTY;
-        return getTransportClient(hostName, transport_port, defaultSettings);
+        return getTransportClient(hostName, new int[] {transport_port});
     }
 
     public static TransportClient getTransportClient(String hostName, int transport_port, Settings settings) throws UnknownHostException {
+        return getTransportClient(hostName, new int[] {transport_port}, settings);
+    }
 
-        Host host = new Host(hostName, transport_port);
+    public static TransportClient getTransportClient(String hostName, int[] transport_ports) throws UnknownHostException {
+        Settings defaultSettings = Settings.EMPTY;
+        return getTransportClient(hostName, transport_ports, defaultSettings);
+    }
+
+    public static TransportClient getTransportClient(String hostName, int[] transport_ports, Settings settings) throws UnknownHostException {
+
+        Host host = new Host(hostName, transport_ports);
 
         if(!tcpConnectionMap.containsKey(host)) {
 
             if (LOGGER.isInfoEnabled())
                 LOGGER.info(String.format("Attempting to make TCP connection to ES db %s", hostName));
 
-            TransportClient transportClient = new PreBuiltTransportClient(settings)
-                    .addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), transport_port));
+            TransportClient client = new PreBuiltTransportClient(settings);
+            for (int port : transport_ports) {
+                client.addTransportAddress(new TransportAddress(InetAddress.getByName(hostName), port));
+            }
 
-            tcpConnectionMap.put(host, transportClient);
+            tcpConnectionMap.put(host, client);
 
             if (LOGGER.isInfoEnabled())
                 LOGGER.info(String.format("Successfully made connection to ES db %s", hostName));
@@ -174,19 +185,19 @@ public class ElasticSearchHelper {
 final class Host {
 
     private final String hostName;
-    private final int port;
+    private final int[] ports;
 
-    public Host(String hostName, int port) {
+    public Host(String hostName, int[] ports) {
         this.hostName = hostName;
-        this.port = port;
+        this.ports = ports;
     }
 
     public final String getHostName() {
         return hostName;
     }
 
-    public final int getPort() {
-        return port;
+    public final int[] getPorts() {
+        return ports;
     }
 
     @Override
@@ -194,7 +205,7 @@ final class Host {
         if (otherObject instanceof Host) {
             Host otherHost = (Host) otherObject;
 
-            return (this.getHostName().equals(otherHost.getHostName()) && this.getPort() == otherHost.getPort());
+            return (this.getHostName().equals(otherHost.getHostName()) && this.getPorts() == otherHost.getPorts());
         } else {
             return false;
         }
@@ -202,6 +213,6 @@ final class Host {
 
     @Override
     public int hashCode() {
-        return (this.getHostName() + ":" + this.getPort()).hashCode();
+        return (this.getHostName() + ":" + this.getPorts()).hashCode();
     }
 }

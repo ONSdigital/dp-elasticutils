@@ -7,6 +7,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -116,6 +117,14 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
                 .setType(this.documentType.getDocumentType())
                 .setSource(messageBytes, xContentType)
                 .request();
+    }
+
+    @Override
+    public boolean updateIndexSettings(Settings settings) {
+        UpdateSettingsResponse response = this.admin().indices().prepareUpdateSettings(super.indexName)
+                .setSettings(settings)
+                .get();
+        return response.isAcknowledged();
     }
 
     // DELETE //

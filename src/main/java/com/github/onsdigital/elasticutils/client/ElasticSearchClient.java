@@ -12,6 +12,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.support.WriteRequest;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
@@ -19,10 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.net.UnknownHostException;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -140,9 +139,31 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
                 .forEach(bulkProcessor::add);
     }
 
+    public void optimiseIndex(List<T> entities) throws IOException {
+        optimiseIndex(entities.stream());
+    }
+
+    public void optimiseIndex(Stream<T> entities) throws IOException {
+        optimiseIndex(entities, 30);
+    }
+
+    public void optimiseIndex(Stream<T> entities, int refreshInterval) throws IOException {
+        // Modifies the refresh policy to optimise the index process
+        this.updateIndexRefreshInterval(refreshInterval);
+        this.index(entities);
+        this.updateIndexRefreshInterval(1);
+    }
+
     public abstract IndexRequest createIndexRequest(byte[] messageBytes);
 
     public abstract IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType);
+
+    public boolean updateIndexRefreshInterval(int interval) throws IOException {
+        Settings settings = Settings.builder().put("refresh_interval", String.format("%is", interval)).build();
+        return this.updateIndexSettings(settings);
+    }
+
+    public abstract boolean updateIndexSettings(Settings settings) throws IOException;
 
     protected abstract BulkProcessor getBulkProcessor();
 
@@ -203,6 +224,23 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
             } catch (Exception e) {
                 LOGGER.error("Unable to close ElasticSearchClient", e);
             }
+        }
+    }
+
+    public static void main(String[] args) throws UnknownHostException {
+        ElasticSearchClient client = new ElasticSearchRESTClient("localhost", "movies", Object.class);
+//        ElasticSearchClient client = new ElasticSearchTransportClient("localhost", "movies", Object.class);
+
+        Settings settings = Settings.builder().put("refresh_interval", "1s").build();
+
+        try {
+            client.updateIndexSettings(settings);
+            client.awaitClose(1, TimeUnit.SECONDS);
+            client.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
