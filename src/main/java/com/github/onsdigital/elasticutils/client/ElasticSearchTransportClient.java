@@ -2,6 +2,7 @@ package com.github.onsdigital.elasticutils.client;
 
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
+import org.apache.http.HttpStatus;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
@@ -106,6 +107,16 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
+    public boolean createIndex(String indexName) throws IOException {
+        IndexRequest request = this.client.prepareIndex()
+                .setIndex(indexName)
+                .request();
+
+        IndexResponse response = this.client.index(request).actionGet();
+        return (response.status().getStatus() == HttpStatus.SC_OK);
+    }
+
+    @Override
     public IndexRequest createIndexRequest(byte[] messageBytes) {
         return this.createIndexRequest(messageBytes, XContentType.JSON);
     }
@@ -140,6 +151,11 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 
         DeleteResponse deleteResponse = this.client.delete(deleteRequest).actionGet();
         return deleteResponse;
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.bulkProcessor.close();
     }
 
     public void deleteByQuery(QueryBuilder qb) {

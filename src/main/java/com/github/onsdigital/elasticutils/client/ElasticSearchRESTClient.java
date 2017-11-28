@@ -94,13 +94,22 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
     @Override
     public boolean indexExists(String indexName) throws IOException {
-        try (RestClient lowLevelClient = this.getLowLevelClient()) {
-            Response response = lowLevelClient.performRequest(
-                    HttpRequestType.HEAD.getRequestType(), indexName
-            );
+        RestClient lowLevelClient = this.getLowLevelClient();
+        Response response = lowLevelClient.performRequest(
+                HttpRequestType.HEAD.getRequestType(), indexName
+        );
 
-            return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
-        }
+        return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+    }
+
+    @Override
+    public boolean createIndex(String indexName) throws IOException {
+        RestClient lowLevelClient = this.getLowLevelClient();
+        Response response = lowLevelClient.performRequest(
+                HttpRequestType.PUT.getRequestType(), super.indexName
+        );
+
+        return (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
     }
 
     @Override
@@ -130,17 +139,16 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     public boolean updateIndexSettings(Settings settings) throws IOException {
         Map<String, String> settingsMap = settings.getAsMap();
 
-        try (RestClient lowLevelClient = this.getLowLevelClient()) {
+        RestClient lowLevelClient = this.getLowLevelClient();
 
-            String json = MAPPER.writeValueAsString(settingsMap);
-            HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
+        String json = MAPPER.writeValueAsString(settingsMap);
+        HttpEntity entity = new NStringEntity(json, ContentType.APPLICATION_JSON);
 
-            String api = getIndexEndPoint(super.indexName) + "/_settings";
-            Response response = lowLevelClient.performRequest(HttpRequestType.PUT.getRequestType(), api, Collections.<String, String>emptyMap(),
-                    entity);
+        String api = getIndexEndPoint(super.indexName) + "/_settings";
+        Response response = lowLevelClient.performRequest(HttpRequestType.PUT.getRequestType(), api, Collections.<String, String>emptyMap(),
+                entity);
 
-            return (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
-        }
+        return (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
     }
 
     // DELETE //
@@ -154,6 +162,12 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
 
         DeleteResponse deleteResponse = this.client.delete(deleteRequest);
         return deleteResponse;
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.getLowLevelClient().close();
+        this.client.close();
     }
 
     public Response deleteIndex(String indexName) throws IOException {
@@ -190,7 +204,7 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
         return this.client;
     }
 
-    // Use the low-level client with care, and ALWAYS within a try with resource block (see above)
+    // Use the low-level client with care
     public RestClient getLowLevelClient() {
         return this.client.getLowLevelClient();
     }
