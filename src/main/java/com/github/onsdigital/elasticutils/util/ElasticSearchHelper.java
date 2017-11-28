@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -37,8 +37,8 @@ public class ElasticSearchHelper {
     public static final int DEFAULT_TCP_PORT = 9300;
     public static final int DEFAULT_XPACK_TCP_PORT = 9301;
 
-    private static Map<Host, RestHighLevelClient> httpConnectionMap;
-    private static Map<Host, TransportClient> tcpConnectionMap;
+    public static Map<Host, RestHighLevelClient> httpConnectionMap;
+    public static Map<Host, TransportClient> tcpConnectionMap;
 
     static {
         httpConnectionMap = new ConcurrentHashMap<>();
@@ -185,18 +185,21 @@ public class ElasticSearchHelper {
 final class Host {
 
     private final String hostName;
-    private final int[] ports;
+    private final List<Integer> ports;
 
     public Host(String hostName, int[] ports) {
         this.hostName = hostName;
-        this.ports = ports;
+        this.ports = new ArrayList<>();
+        for (int port : ports) {
+            this.ports.add(Integer.valueOf(port));
+        }
     }
 
     public final String getHostName() {
         return hostName;
     }
 
-    public final int[] getPorts() {
+    public final List<Integer> getPorts() {
         return ports;
     }
 
@@ -205,7 +208,7 @@ final class Host {
         if (otherObject instanceof Host) {
             Host otherHost = (Host) otherObject;
 
-            return (this.getHostName().equals(otherHost.getHostName()) && this.getPorts() == otherHost.getPorts());
+            return (this.getHostName().equals(otherHost.getHostName()) && this.getPorts().equals(otherHost.getPorts()));
         } else {
             return false;
         }
@@ -213,6 +216,9 @@ final class Host {
 
     @Override
     public int hashCode() {
-        return (this.getHostName() + ":" + this.getPorts()).hashCode();
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.hostName);
+        hash = 29 * hash + Objects.hashCode(this.ports);
+        return hash;
     }
 }
