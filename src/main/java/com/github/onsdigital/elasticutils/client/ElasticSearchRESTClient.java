@@ -43,21 +43,32 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     private BulkProcessor bulkProcessor;
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final BulkProcessorConfiguration DEFAULT_CONFIGURATION;
 
-    public ElasticSearchRESTClient(String hostName, String indexName, Class<T> returnClass) {
-        this(hostName, ElasticSearchHelper.DEFAULT_HTTP_PORT, indexName,
-                ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
+    static {
+        DEFAULT_CONFIGURATION = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
     }
 
-    public ElasticSearchRESTClient(String hostName, int http_port, String indexName, Class<T> returnClass) {
-        this(hostName, http_port, indexName,
-                ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
+    public ElasticSearchRESTClient(final String hostName, final String indexName, final Class<T> returnClass) {
+        this(hostName, ElasticSearchHelper.DEFAULT_HTTP_PORT, indexName, returnClass);
     }
 
-    public ElasticSearchRESTClient(String hostName, int http_port, String indexName,
-                                   final BulkProcessorConfiguration bulkProcessorConfiguration, Class<T> returnClass) {
-        super(hostName, http_port, indexName, bulkProcessorConfiguration, returnClass);
-        this.client = ElasticSearchHelper.getRestClient(super.hostName, super.port);
+    public ElasticSearchRESTClient(final String hostName, final int http_port, final String indexName, final Class<T> returnClass) {
+        this(hostName, http_port, indexName, DEFAULT_CONFIGURATION, returnClass);
+    }
+
+    public ElasticSearchRESTClient(final String hostName, final int http_port, final String indexName,
+                                   final BulkProcessorConfiguration bulkProcessorConfiguration,
+                                   final Class<T> returnClass) {
+        this(indexName, ElasticSearchHelper.getRestClient(hostName, http_port), bulkProcessorConfiguration, returnClass);
+    }
+
+    public ElasticSearchRESTClient(final String indexName,
+                                   final RestHighLevelClient client,
+                                   final BulkProcessorConfiguration bulkProcessorConfiguration,
+                                   final Class<T> returnClass) {
+        super(indexName, bulkProcessorConfiguration, returnClass);
+        this.client = client;
         this.bulkProcessor = super.bulkProcessorConfiguration.build(this.client);
     }
 
@@ -93,17 +104,17 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean indexExists(String indexName) throws IOException {
+    public boolean indexExists() throws IOException {
         RestClient lowLevelClient = this.getLowLevelClient();
         Response response = lowLevelClient.performRequest(
-                HttpRequestType.HEAD.getRequestType(), indexName
+                HttpRequestType.HEAD.getRequestType(), super.indexName
         );
 
         return response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
     }
 
     @Override
-    public boolean createIndex(String indexName) throws IOException {
+    public boolean createIndex() throws IOException {
         RestClient lowLevelClient = this.getLowLevelClient();
         Response response = lowLevelClient.performRequest(
                 HttpRequestType.PUT.getRequestType(), super.indexName
@@ -113,14 +124,15 @@ public class ElasticSearchRESTClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public IndexRequest createIndexRequest(byte[] messageBytes) {
-        return this.createIndexRequest(messageBytes, XContentType.JSON);
+    public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
+        return createIndexRequestWithPipeline(messageBytes, null, xContentType);
     }
 
     @Override
-    public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
+    public IndexRequest createIndexRequestWithPipeline(byte[] messageBytes, String pipeline, XContentType xContentType) {
         IndexRequest indexRequest = new IndexRequest(super.indexName)
                 .source(messageBytes, XContentType.JSON)
+                .setPipeline(pipeline)
                 .type(super.documentType.getDocumentType());
 
         return indexRequest;

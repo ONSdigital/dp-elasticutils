@@ -4,6 +4,7 @@ import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcesso
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -32,6 +33,10 @@ public class ElasticSearchHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHelper.class);
 
+    private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
+    private static final int DEFAULT_SOCKET_TIMEOUT = 60000;
+    private static final int DEFAULT_MAX_RETRY_TIMEOUT = 60000;
+
     public static final int DEFAULT_HTTP_PORT = 9200;
 
     public static final int DEFAULT_TCP_PORT = 9300;
@@ -44,17 +49,25 @@ public class ElasticSearchHelper {
     }
 
     public static RestHighLevelClient getRestClient(String hostName, int http_port) {
+        return getRestClient(hostName, http_port,
+                DEFAULT_CONNECT_TIMEOUT, DEFAULT_SOCKET_TIMEOUT, DEFAULT_MAX_RETRY_TIMEOUT);
+    }
+
+    public static RestHighLevelClient getRestClient(String hostName,
+            int http_port, int connectTimeout, int socketTimeout, int maxRetryTimeout) {
 
         LOGGER.info("Attempting to make HTTP connection to ES database: {} {}", hostName, http_port);
 
         // Set some basic headers for all requests
         BasicHeader[] headers = { new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json") };
 
-        RestHighLevelClient client = new RestHighLevelClient(
-                RestClient.builder(
-                        new HttpHost(hostName, http_port, Scheme.HTTP.getScheme())
-                ).setDefaultHeaders(headers)
-        );
+        RestClientBuilder builder = RestClient.builder(new HttpHost(hostName, http_port))
+                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectTimeout)
+                        .setSocketTimeout(socketTimeout))
+                        .setMaxRetryTimeoutMillis(maxRetryTimeout)
+                        .setDefaultHeaders(headers);
+
+        RestHighLevelClient client = new RestHighLevelClient(builder);
 
         LOGGER.info("Successfully made HTTP connection to ES database: {} {}", hostName, http_port);
         return client;

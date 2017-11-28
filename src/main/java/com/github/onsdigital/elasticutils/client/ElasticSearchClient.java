@@ -43,19 +43,14 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected DocumentType documentType = DocumentType.DOCUMENT;
 
-    protected final String hostName;
-    protected final int port;
     protected final String indexName;
     protected final BulkProcessorConfiguration bulkProcessorConfiguration;
-    protected Class<T> returnClass;
+    protected final Class<T> returnClass;
 
     private static ObjectMapper MAPPER = new ObjectMapper();
 
-    public ElasticSearchClient(String hostName, int port, String indexName,
-                               BulkProcessorConfiguration bulkProcessorConfiguration,
-                               Class<T> returnClass) {
-        this.hostName = hostName;
-        this.port = port;
+    public ElasticSearchClient(final String indexName, final BulkProcessorConfiguration bulkProcessorConfiguration,
+                               final Class<T> returnClass) {
         this.indexName = indexName;
         this.bulkProcessorConfiguration = bulkProcessorConfiguration;
         this.returnClass = returnClass;
@@ -107,9 +102,9 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected abstract IndexResponse indexWithRefreshPolicy(IndexRequest indexRequest, RefreshPolicy refreshPolicy) throws IOException;
 
-    public abstract boolean indexExists(String indexName) throws IOException;
+    public abstract boolean indexExists() throws IOException;
 
-    public abstract boolean createIndex(String indexName) throws IOException;
+    public abstract boolean createIndex() throws IOException;
 
     public IndexResponse indexAndRefresh(T entity) throws IOException {
         Optional<byte[]> messageBytes = JsonUtils.convertJsonToBytes(entity);
@@ -148,18 +143,26 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     public void bulkIndexWithRefreshInterval(Stream<T> entities) throws IOException {
-        if (!this.indexExists(this.indexName)) {
+        if (!this.indexExists()) {
             LOGGER.info("Creating index: {}", this.indexName);
-            this.createIndex(this.indexName);
+            this.createIndex();
         }
         this.updateIndexRefreshInterval(30);
         this.index(entities);
         this.updateIndexRefreshInterval(1);
     }
 
-    public abstract IndexRequest createIndexRequest(byte[] messageBytes);
+    public IndexRequest createIndexRequest(byte[] messageBytes) {
+        return createIndexRequest(messageBytes, XContentType.JSON);
+    }
 
     public abstract IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType);
+
+    public IndexRequest createIndexRequestWithPipeline(byte[] messageBytes, String pipeline) {
+        return createIndexRequestWithPipeline(messageBytes, pipeline, XContentType.JSON);
+    }
+
+    public abstract IndexRequest createIndexRequestWithPipeline(byte[] messageBytes, String pipeline, XContentType xContentType);
 
     public boolean resetRefreshInterval() throws IOException {
         return updateIndexRefreshInterval(1);

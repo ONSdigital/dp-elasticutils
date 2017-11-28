@@ -20,6 +20,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -46,25 +47,40 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
 
     private final Client client;
     private final BulkProcessor bulkProcessor;
+    private static final BulkProcessorConfiguration DEFAULT_CONFIGURATION;
 
-    public ElasticSearchTransportClient(String hostName, String indexName, Class<T> returnClass) throws UnknownHostException {
+    static {
+        DEFAULT_CONFIGURATION = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+    }
+
+    public ElasticSearchTransportClient(final String hostName, final String indexName, final Class<T> returnClass) throws UnknownHostException {
         this(hostName, ElasticSearchHelper.DEFAULT_TCP_PORT, indexName, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Class<T> returnClass) throws UnknownHostException {
-        this(hostName, transport_port, indexName, Settings.EMPTY, returnClass);
+    public ElasticSearchTransportClient(final String hostName, final int tcp_port, final String indexName, final Class<T> returnClass) throws UnknownHostException {
+        this(hostName, tcp_port, indexName, Settings.EMPTY, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Settings settings, Class<T> returnClass) throws UnknownHostException {
-        this(hostName, transport_port, indexName, settings, ElasticSearchHelper.getDefaultBulkProcessorConfiguration(), returnClass);
-
+    public ElasticSearchTransportClient(final String hostName, final int tcp_port, final String indexName,
+                                        final Settings settings,
+                                        final Class<T> returnClass) throws UnknownHostException {
+        this(hostName, tcp_port, indexName, settings, DEFAULT_CONFIGURATION, returnClass);
     }
 
-    public ElasticSearchTransportClient(String hostName, int transport_port, String indexName, Settings settings,
-                                        BulkProcessorConfiguration bulkProcessorConfiguration, Class<T> returnClass) throws UnknownHostException {
-        super(hostName, transport_port, indexName, bulkProcessorConfiguration, returnClass);
-        this.client = ElasticSearchHelper.getTransportClient(super.hostName, super.port, settings);
-        this.bulkProcessor = super.bulkProcessorConfiguration.build(client);
+    public ElasticSearchTransportClient(final String hostName, final int tcp_port, final String indexName,
+                                   final Settings settings,
+                                   final BulkProcessorConfiguration bulkProcessorConfiguration,
+                                   final Class<T> returnClass) throws UnknownHostException {
+        this(indexName, ElasticSearchHelper.getTransportClient(hostName, tcp_port, settings), bulkProcessorConfiguration, returnClass);
+    }
+
+    public ElasticSearchTransportClient(final String indexName,
+                                   final TransportClient client,
+                                   final BulkProcessorConfiguration bulkProcessorConfiguration,
+                                   final Class<T> returnClass) {
+        super(indexName, bulkProcessorConfiguration, returnClass);
+        this.client = client;
+        this.bulkProcessor = super.bulkProcessorConfiguration.build(this.client);
     }
 
     // SEARCH //
@@ -99,17 +115,17 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean indexExists(String indexName) {
-        IndicesExistsRequest request = new IndicesExistsRequest(indexName);
+    public boolean indexExists() {
+        IndicesExistsRequest request = new IndicesExistsRequest(super.indexName);
 
         IndicesExistsResponse response = this.admin().indices().exists(request).actionGet();
         return response.isExists();
     }
 
     @Override
-    public boolean createIndex(String indexName) throws IOException {
+    public boolean createIndex() throws IOException {
         IndexRequest request = this.client.prepareIndex()
-                .setIndex(indexName)
+                .setIndex(super.indexName)
                 .request();
 
         IndexResponse response = this.client.index(request).actionGet();
@@ -117,16 +133,17 @@ public class ElasticSearchTransportClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public IndexRequest createIndexRequest(byte[] messageBytes) {
-        return this.createIndexRequest(messageBytes, XContentType.JSON);
+    public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
+        return createIndexRequestWithPipeline(messageBytes, null, xContentType);
     }
 
     @Override
-    public IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
+    public IndexRequest createIndexRequestWithPipeline(byte[] messageBytes, String pipeline, XContentType xContentType) {
         return this.client.prepareIndex()
                 .setIndex(super.indexName)
                 .setType(this.documentType.getDocumentType())
                 .setSource(messageBytes, xContentType)
+                .setPipeline(pipeline)
                 .request();
     }
 

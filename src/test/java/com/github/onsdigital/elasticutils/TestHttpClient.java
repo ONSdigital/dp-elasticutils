@@ -54,8 +54,8 @@ public class TestHttpClient {
                 // Here we can just use the generic ElasticSearchClient
                 ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-                if (!searchClient.indexExists(ElasticIndex.TEST.getIndexName())) {
-                    searchClient.createIndex(ElasticIndex.TEST.getIndexName());
+                if (!searchClient.indexExists()) {
+                    searchClient.createIndex();
                 }
 
                 IndexResponse indexResponse = searchClient.indexAndRefresh(geoLocation);
