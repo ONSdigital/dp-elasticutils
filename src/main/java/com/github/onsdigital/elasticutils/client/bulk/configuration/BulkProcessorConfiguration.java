@@ -6,6 +6,7 @@ package com.github.onsdigital.elasticutils.client.bulk.configuration;
 import com.github.onsdigital.elasticutils.client.bulk.listener.LoggingBulkProcessorListener;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptionsBuilder;
+import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -46,12 +47,12 @@ public class BulkProcessorConfiguration {
                 .build();
     }
 
-    public BulkProcessor build(final RestHighLevelClient client) {
+    public BulkProcessor build(final SimpleRestClient client) {
         Settings defaultSettings = Settings.builder().put("node.name", "NodeScope").build();
         return build(client, defaultSettings);
     }
 
-    public BulkProcessor build(final RestHighLevelClient client, Settings settings) {
+    public BulkProcessor build(final SimpleRestClient client, Settings settings) {
         ThreadPool threadPool = new ThreadPool(settings);
 
         LoggingBulkProcessorListener listener = new LoggingBulkProcessorListener();

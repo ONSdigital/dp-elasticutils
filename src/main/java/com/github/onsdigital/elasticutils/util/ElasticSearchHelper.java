@@ -1,14 +1,13 @@
 package com.github.onsdigital.elasticutils.util;
 
+import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -19,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author sullid (David Sullivan) on 14/11/2017
@@ -44,16 +41,16 @@ public class ElasticSearchHelper {
 
     // HTTP
 
-    public static RestHighLevelClient getRestClient(String hostName) {
+    public static SimpleRestClient getRestClient(String hostName) {
         return getRestClient(hostName, DEFAULT_HTTP_PORT);
     }
 
-    public static RestHighLevelClient getRestClient(String hostName, int http_port) {
+    public static SimpleRestClient getRestClient(String hostName, int http_port) {
         return getRestClient(hostName, http_port,
                 DEFAULT_CONNECT_TIMEOUT, DEFAULT_SOCKET_TIMEOUT, DEFAULT_MAX_RETRY_TIMEOUT);
     }
 
-    public static RestHighLevelClient getRestClient(String hostName,
+    public static SimpleRestClient getRestClient(String hostName,
             int http_port, int connectTimeout, int socketTimeout, int maxRetryTimeout) {
 
         LOGGER.info("Attempting to make HTTP connection to ES database: {} {}", hostName, http_port);
@@ -67,7 +64,7 @@ public class ElasticSearchHelper {
                         .setMaxRetryTimeoutMillis(maxRetryTimeout)
                         .setDefaultHeaders(headers);
 
-        RestHighLevelClient client = new RestHighLevelClient(builder);
+        SimpleRestClient client = new SimpleRestClient(builder);
 
         LOGGER.info("Successfully made HTTP connection to ES database: {} {}", hostName, http_port);
         return client;

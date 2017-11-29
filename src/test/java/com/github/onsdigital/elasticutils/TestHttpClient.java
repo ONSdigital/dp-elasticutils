@@ -1,20 +1,28 @@
 package com.github.onsdigital.elasticutils;
 
-import com.github.onsdigital.elasticutils.client.ElasticSearchClient;
-import com.github.onsdigital.elasticutils.client.ElasticSearchRESTClient;
+import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
+import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
+import com.github.onsdigital.elasticutils.client.generic.ElasticSearchResponse;
+import com.github.onsdigital.elasticutils.client.generic.RestSearchClient;
+import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
+import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
+import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHits;
-import org.junit.*;
-import org.junit.runners.MethodSorters;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -35,9 +43,11 @@ public class TestHttpClient {
     private static final String HOSTNAME = "localhost";
     private static final String DOCUMENT_ID = UUID.randomUUID().toString();
 
-    private ElasticSearchRESTClient<GeoLocation> getClient(ElasticSearchPort port) {
-        ElasticSearchRESTClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
-                HOSTNAME, port.getPort(), ElasticIndex.TEST.getIndexName(), GeoLocation.class
+    private RestSearchClient<GeoLocation> getClient(ElasticSearchPort port) {
+        SimpleRestClient client = ElasticSearchHelper.getRestClient(HOSTNAME, port.getPort());
+        BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+        RestSearchClient<GeoLocation> searchClient = new RestSearchClient<GeoLocation>(
+                client, ElasticIndex.TEST.getIndexName(), configuration, GeoLocation.class
         );
         return searchClient;
     }
@@ -54,17 +64,20 @@ public class TestHttpClient {
                 // Here we can just use the generic ElasticSearchClient
                 ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-                if (!searchClient.indexExists()) {
-                    searchClient.createIndex();
-                }
+                IndexRequest request = searchClient.prepareIndex()
+                        .setIndex(ElasticIndex.TEST.getIndexName())
+                        .setType(DocumentType.DOCUMENT.getType())
+                        .setSource(geoLocation)
+                        .request()
+                        .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);;
 
-                IndexResponse indexResponse = searchClient.indexAndRefresh(geoLocation);
-//                searchClient.bulkIndexWithRefreshInterval(Arrays.asList(geoLocation));
+                IndexResponse indexResponse = searchClient.index(request);
                 searchClient.awaitClose(1, TimeUnit.SECONDS);
 
                 // Assert that we got back a 201 response
                 assertEquals(HttpStatus.SC_CREATED, indexResponse.status().getStatus());
             } catch (Exception e) {
+                e.printStackTrace();
                 Assert.fail("Exception in createTestIndexHttp: " + e);
             }
         }
@@ -73,9 +86,9 @@ public class TestHttpClient {
     @After
     public void deleteIndex() {
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
-            ElasticSearchRESTClient client = getClient(port);
+            RestSearchClient client = getClient(port);
             try {
-                Response response = client.deleteIndex(ElasticIndex.TEST.getIndexName());
+                Response response = client.dropIndex();
                 assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
             } catch (IOException e) {
                 Assert.fail("Failed to delete test index: " + e);
@@ -89,7 +102,7 @@ public class TestHttpClient {
 
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
             try {
-                ElasticSearchRESTClient<GeoLocation> searchClient = getClient(port);
+                RestSearchClient<GeoLocation> searchClient = getClient(port);
 
                 MainResponse response = searchClient.info();
                 assertTrue(response.isAvailable());
@@ -105,41 +118,49 @@ public class TestHttpClient {
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
             QueryBuilder qb = QueryBuilders.matchQuery("geoId", DOCUMENT_ID);
 
-            ElasticSearchClient<GeoLocation> searchClient = null;
-            SearchHits hits = null;
-            try {
-                 searchClient = getClient(port);
+            ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-                hits = searchClient.search(qb);
+            SearchRequest request = searchClient.prepareSearch()
+                    .setTypes(DocumentType.DOCUMENT.getType())
+                    .setQuery(qb)
+                    .setExplain(true)
+                    .request();
+
+            ElasticSearchResponse<GeoLocation> response = null;
+
+            try {
+                response = searchClient.search(request);
             } catch (IOException e) {
                 Assert.fail("Exception in testHttpSearch: " + e);
             }
-            List<GeoLocation> geoLocations = searchClient.deserialize(hits);
+            List<GeoLocation> geoLocations = response.entities();
+
+            System.out.println(response.getResponse().status().getStatus());
 
             assertEquals(1, geoLocations.size());
             assertEquals(DOCUMENT_ID, geoLocations.get(0).getGeoId());
         }
     }
 
-    @Test
-    public void testIndexWithRefreshInterval() {
-        // Test object to index
-        GeoLocation geoLocation = new GeoLocation(DOCUMENT_ID, 51.566407, -3.027560);  // ONS
-
-        for (ElasticSearchPort port : ElasticSearchPort.values()) {
-            ElasticSearchRESTClient<GeoLocation> searchClient = null;
-            try {
-                 searchClient = getClient(port);
-
-                searchClient.bulkIndexWithRefreshInterval(Arrays.asList(geoLocation));
-                searchClient.awaitClose(1, TimeUnit.SECONDS);
-            } catch (IOException e) {
-                Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
-            } catch (InterruptedException e) {
-                Assert.fail(e.getMessage());
-            }
-        }
-    }
+//    @Test
+//    public void testIndexWithRefreshInterval() {
+//        // Test object to index
+//        GeoLocation geoLocation = new GeoLocation(DOCUMENT_ID, 51.566407, -3.027560);  // ONS
+//
+//        for (ElasticSearchPort port : ElasticSearchPort.values()) {
+//            RestSearchClient<GeoLocation> searchClient = null;
+//            try {
+//                searchClient = getClient(port);
+//
+//                searchClient.bulkIndexWithRefreshInterval(Arrays.asList(geoLocation));
+//                searchClient.awaitClose(1, TimeUnit.SECONDS);
+//            } catch (IOException e) {
+//                Assert.fail("Exception in testHttpIndexSearchAndDelete: " + e);
+//            } catch (InterruptedException e) {
+//                Assert.fail(e.getMessage());
+//            }
+//        }
+//    }
 
     /*
     This enum is used for testing only with the supplied docker containers

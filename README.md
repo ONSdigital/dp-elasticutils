@@ -52,17 +52,25 @@ public class GeoLocation {
 
 
 // RESTful HTTP client
-ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchRESTClient<GeoLocation>(
-        HOSTNAME, 9200, ElasticIndex.TEST, GeoLocation.class
+SimpleRestClient client = ElasticSearchHelper.getRestClient(HOSTNAME, 9200);
+BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+String indexName = ElasticIndex.TEST.getIndexName();
+
+ElasticSearchClient<GeoLocation> searchClient = new RestSearchClient<GeoLocation>(
+        client, indexName, configuration, GeoLocation.class
 );
 
 // TCP client
-ElasticSearchClient<GeoLocation> searchClient = new ElasticSearchTransportClient<GeoLocation>(
-        HOSTNAME, 9300, ElasticIndex.TEST, GeoLocation.class
+TransportClient client = ElasticSearchHelper.getTransportClient(HOSTNAME, port.getPort(), settings);
+BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+String indexName = ElasticIndex.TEST.getIndexName();
+
+ElasticSearchClient<GeoLocation> searchClient = new TransportSearchClient<GeoLocation>(
+        client, indexName, configuration, GeoLocation.class
 );
 ```
 
-The ElasticSearchClient implements document indexing, search, and deletion.
+The ElasticSearchClient implements document indexing, search, and deletion aswell as deserialization of POJOs via the ElasticSearchResponse class.
 
 ### Maven dependency
 
