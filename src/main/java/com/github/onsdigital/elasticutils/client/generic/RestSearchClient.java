@@ -24,13 +24,13 @@ import java.util.StringJoiner;
 public class RestSearchClient<T> extends ElasticSearchClient<T> {
 
     private SimpleRestClient client;
-    private final BulkProcessorConfiguration configuration;
+    private final BulkProcessor bulkProcessor;
 
     public RestSearchClient(SimpleRestClient client, String index, final BulkProcessorConfiguration configuration,
                             final Class<T> returnClass) {
         super(index, returnClass);
         this.client = client;
-        this.configuration = configuration;
+        this.bulkProcessor = configuration.build(this.client);
     }
 
     // INDEX //
@@ -47,7 +47,7 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
 
     @Override
     protected BulkProcessor getBulkProcessor() {
-        return this.configuration.build(this.client);
+        return this.bulkProcessor;
     }
 
     @Override
@@ -102,5 +102,10 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
             }
         }
         return joiner.toString();
+    }
+
+    @Override
+    public void shutdown() throws IOException {
+        this.client.close();
     }
 }

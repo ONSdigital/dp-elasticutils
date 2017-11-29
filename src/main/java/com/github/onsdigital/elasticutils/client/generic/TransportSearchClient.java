@@ -21,13 +21,13 @@ import java.io.IOException;
 public class TransportSearchClient<T> extends ElasticSearchClient<T> {
 
     private TransportClient client;
-    private final BulkProcessorConfiguration configuration;
+    private final BulkProcessor bulkProcessor;
 
     public TransportSearchClient(TransportClient client, String index, final BulkProcessorConfiguration configuration,
                             final Class<T> returnClass) {
         super(index, returnClass);
         this.client = client;
-        this.configuration = configuration;
+        this.bulkProcessor = configuration.build(this.client);
     }
 
     // INDEX //
@@ -44,7 +44,7 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
 
     @Override
     protected BulkProcessor getBulkProcessor() {
-        return this.configuration.build(this.client);
+        return this.bulkProcessor;
     }
 
     @Override
@@ -75,5 +75,10 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
 
     public AdminClient admin() {
         return this.client.admin();
+    }
+
+    @Override
+    public void shutdown() {
+        this.client.close();
     }
 }

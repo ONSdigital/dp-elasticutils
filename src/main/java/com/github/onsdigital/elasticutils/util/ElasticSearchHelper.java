@@ -6,11 +6,15 @@ import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOpti
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
+import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.Logger;
@@ -30,10 +34,6 @@ public class ElasticSearchHelper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchHelper.class);
 
-    private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
-    private static final int DEFAULT_SOCKET_TIMEOUT = 60000;
-    private static final int DEFAULT_MAX_RETRY_TIMEOUT = 60000;
-
     public static final int DEFAULT_HTTP_PORT = 9200;
 
     public static final int DEFAULT_TCP_PORT = 9300;
@@ -46,12 +46,6 @@ public class ElasticSearchHelper {
     }
 
     public static SimpleRestClient getRestClient(String hostName, int http_port) {
-        return getRestClient(hostName, http_port,
-                DEFAULT_CONNECT_TIMEOUT, DEFAULT_SOCKET_TIMEOUT, DEFAULT_MAX_RETRY_TIMEOUT);
-    }
-
-    public static SimpleRestClient getRestClient(String hostName,
-            int http_port, int connectTimeout, int socketTimeout, int maxRetryTimeout) {
 
         LOGGER.info("Attempting to make HTTP connection to ES database: {} {}", hostName, http_port);
 
@@ -59,9 +53,6 @@ public class ElasticSearchHelper {
         BasicHeader[] headers = { new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json") };
 
         RestClientBuilder builder = RestClient.builder(new HttpHost(hostName, http_port))
-                .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(connectTimeout)
-                        .setSocketTimeout(socketTimeout))
-                        .setMaxRetryTimeoutMillis(maxRetryTimeout)
                         .setDefaultHeaders(headers);
 
         SimpleRestClient client = new SimpleRestClient(builder);
@@ -125,43 +116,19 @@ public class ElasticSearchHelper {
         /*
         Return the default BulkProcessorConfiguration with a maximum of 100 bulk actions
          */
-        return getDefaultBulkProcessorConfiguration(100);
+        return getDefaultBulkProcessorConfiguration(10000);
     }
 
     public static BulkProcessorConfiguration getDefaultBulkProcessorConfiguration(int numBulkActions) {
         BulkProcessorConfiguration bulkProcessorConfiguration = new BulkProcessorConfiguration(BulkProcessingOptions.builder()
                 .setBulkActions(numBulkActions)
+                .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
+                .setFlushInterval(TimeValue.timeValueSeconds(5))
+                .setConcurrentRequests(1)
+                .setBackoffPolicy(
+                        BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
                 .build());
         return bulkProcessorConfiguration;
-    }
-
-    public enum ClientType {
-        TCP("TCP"),
-        REST("REST");
-
-        private String clientType;
-
-        ClientType(String clientType) {
-            this.clientType = clientType;
-        }
-
-        public String getClientType() {
-            return clientType;
-        }
-    }
-
-    public enum Scheme {
-        HTTP("http");
-
-        private String scheme;
-
-        Scheme(String scheme) {
-            this.scheme = scheme;
-        }
-
-        public String getScheme() {
-            return scheme;
-        }
     }
 
 }

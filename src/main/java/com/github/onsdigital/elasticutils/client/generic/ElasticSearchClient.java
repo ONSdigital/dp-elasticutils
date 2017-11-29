@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  */
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchClient.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchClient.class);
 
     protected final String index;
     protected final DocumentType type;
@@ -35,7 +35,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         this.index = index;
         this.type = DocumentType.DOCUMENT;
         this.returnClass = returnClass;
-        Runtime.getRuntime().addShutdownHook(new ElasticSearchClient.ShutDownThread(this));
+//        Runtime.getRuntime().addShutdownHook(new ElasticSearchClient.ShutDownThread(this));
     }
 
     // INDEX //
@@ -101,14 +101,18 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     @Override
-    public boolean awaitClose(long timeout, TimeUnit unit) throws InterruptedException {
+    public synchronized boolean awaitClose(long timeout, TimeUnit unit) throws InterruptedException {
         return this.getBulkProcessor().awaitClose(timeout, unit);
     }
 
     @Override
     public void close() throws Exception {
-        this.getBulkProcessor().close();
+        LOGGER.info("Closing client connection");
+        this.shutdown();
+        LOGGER.info("Successfully closed client connection");
     }
+
+    public abstract void shutdown() throws IOException;
 
     private static class ShutDownThread extends Thread {
 
@@ -123,9 +127,9 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         @Override
         public void run() {
             try {
-                if (LOGGER.isDebugEnabled()) LOGGER.debug("Shutting down ElasticSearchClient");
-                client.close();
-                if (LOGGER.isDebugEnabled()) LOGGER.debug("Successfully shut down ElasticSearchClient");
+                LOGGER.info("Shutting down ElasticSearchClient");
+                client.shutdown();
+                LOGGER.info("Successfully shut down ElasticSearchClient");
             } catch (Exception e) {
                 LOGGER.error("Unable to close ElasticSearchClient", e);
             }
