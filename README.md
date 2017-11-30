@@ -94,7 +94,7 @@ private static ElasticSearchClient<Movie> getClient(String hostName, String inde
 }
 
 // Client is shutdown automatically
-try (ElasticSearchClient searchClient = getClient("localhost", "movies")) {
+try (ElasticSearchClient<Movie> searchClient = getClient("localhost", "movies")) {
 
     Iterable<Movie> it = Movie.finder().find();
     List<Movie> movies = new ArrayList<>();
