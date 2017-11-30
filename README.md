@@ -72,6 +72,44 @@ ElasticSearchClient<GeoLocation> searchClient = new TransportSearchClient<GeoLoc
 
 The ElasticSearchClient implements document indexing, search, and deletion aswell as deserialization of POJOs via the ElasticSearchResponse class.
 
+Bulk indexing is asynchronous, and the client supports try with resources for auto-closing. The bulk processor however should be manually closed before client shutdown:
+
+```java
+private static BulkProcessorConfiguration getConfiguration() {
+    BulkProcessorConfiguration bulkProcessorConfiguration = new BulkProcessorConfiguration(BulkProcessingOptions.builder()
+            .setBulkActions(100)
+            .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
+            .setFlushInterval(TimeValue.timeValueSeconds(5))
+            .setConcurrentRequests(5)
+            .setBackoffPolicy(
+                    BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
+            .build());
+    return bulkProcessorConfiguration;
+}
+
+private static ElasticSearchClient<Movie> getClient(String hostName, String indexName) {
+    SimpleRestClient client = ElasticSearchHelper.getRestClient(hostName, 9200);
+    BulkProcessorConfiguration configuration = getConfiguration();
+    return new OpenNlpSearchClient<Movie>(client, indexName, configuration, Movie.class);
+}
+
+// Client is shutdown automatically
+try (ElasticSearchClient searchClient = getClient("localhost", "movies")) {
+
+    Iterable<Movie> it = Movie.finder().find();
+    List<Movie> movies = new ArrayList<>();
+    it.forEach(movies::add);
+
+    searchClient.bulk(movies);
+    // Await close on bulk insert
+    searchClient.awaitClose(30, TimeUnit.SECONDS);
+} catch (InterruptedException e) {
+    e.printStackTrace();
+} catch (Exception e) {
+    e.printStackTrace();
+}
+```
+
 ### Maven dependency
 
 The RESTful client supports Elasticsearch 5.X and 6.0.0, while the TCP client supports 6.0.0 ONLY. Docker will launch containers for Elasticsearch 5.5.0 and Elasticsearch 6.0.0 using the docker-compose.yml file provided.
