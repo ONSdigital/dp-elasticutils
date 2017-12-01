@@ -13,8 +13,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
-import org.elasticsearch.client.Response;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.After;
@@ -42,13 +42,12 @@ public class TestHttpClient {
 
     private static final String HOSTNAME = "localhost";
     private static final String DOCUMENT_ID = UUID.randomUUID().toString();
+    private static final String INDEX = ElasticIndex.TEST.getIndexName();
 
     private RestSearchClient<GeoLocation> getClient(ElasticSearchPort port) {
         SimpleRestClient client = ElasticSearchHelper.getRestClient(HOSTNAME, port.getPort());
         BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
-        RestSearchClient<GeoLocation> searchClient = new RestSearchClient<GeoLocation>(
-                client, ElasticIndex.TEST.getIndexName(), configuration, GeoLocation.class
-        );
+        RestSearchClient<GeoLocation> searchClient = new RestSearchClient<GeoLocation>(client, configuration);
         return searchClient;
     }
 
@@ -88,8 +87,8 @@ public class TestHttpClient {
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
             RestSearchClient client = getClient(port);
             try {
-                Response response = client.dropIndex();
-                assertEquals(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+                boolean success = client.dropIndex(INDEX);
+                assertTrue(success);
             } catch (IOException e) {
                 Assert.fail("Failed to delete test index: " + e);
             }
@@ -120,22 +119,21 @@ public class TestHttpClient {
 
             ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-            SearchRequest request = searchClient.prepareSearch()
+            SearchRequest request = searchClient.prepareSearch(INDEX)
                     .setTypes(DocumentType.DOCUMENT.getType())
                     .setQuery(qb)
                     .setExplain(true)
                     .request();
 
-            ElasticSearchResponse<GeoLocation> response = null;
+            SearchResponse response = null;
 
             try {
                 response = searchClient.search(request);
             } catch (IOException e) {
                 Assert.fail("Exception in testHttpSearch: " + e);
             }
-            List<GeoLocation> geoLocations = response.entities();
-
-            System.out.println(response.getResponse().status().getStatus());
+            ElasticSearchResponse<GeoLocation> elasticSearchResponse = new ElasticSearchResponse<>(response, GeoLocation.class);
+            List<GeoLocation> geoLocations = elasticSearchResponse.entities();
 
             assertEquals(1, geoLocations.size());
             assertEquals(DOCUMENT_ID, geoLocations.get(0).getGeoId());

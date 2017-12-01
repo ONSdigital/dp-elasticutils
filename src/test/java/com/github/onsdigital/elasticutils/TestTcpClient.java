@@ -3,20 +3,17 @@ package com.github.onsdigital.elasticutils;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchResponse;
-import com.github.onsdigital.elasticutils.client.generic.RestSearchClient;
 import com.github.onsdigital.elasticutils.client.generic.TransportSearchClient;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.Response;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.common.settings.Settings;
@@ -46,6 +43,7 @@ public class TestTcpClient
 
     private static final String HOSTNAME = "localhost";
     private static final String DOCUMENT_ID = UUID.randomUUID().toString();
+    private static final String INDEX = ElasticIndex.TEST.getIndexName();
 
     private TransportSearchClient<GeoLocation> getClient(TestTcpClient.ElasticSearchPort port) {
         Settings settings = Settings.builder().put("cluster.name", port.getClusterName()).build();
@@ -54,9 +52,7 @@ public class TestTcpClient
         try {
             TransportClient client = ElasticSearchHelper.getTransportClient(HOSTNAME, port.getPort(), settings);
 
-            TransportSearchClient<GeoLocation> searchClient = new TransportSearchClient<GeoLocation>(
-                    client, ElasticIndex.TEST.getIndexName(), configuration, GeoLocation.class
-            );
+            TransportSearchClient<GeoLocation> searchClient = new TransportSearchClient<GeoLocation>(client, configuration);
             return searchClient;
         } catch (UnknownHostException e) {
             Assert.fail(e.getMessage());
@@ -100,8 +96,8 @@ public class TestTcpClient
         for (TestTcpClient.ElasticSearchPort port : TestTcpClient.ElasticSearchPort.values()) {
             TransportSearchClient<GeoLocation> client = getClient(port);
 
-            DeleteIndexResponse response = client.dropIndex();
-            assertTrue(response.isAcknowledged());
+            boolean success = client.dropIndex(INDEX);
+            assertTrue(success);
         }
     }
 
@@ -135,20 +131,21 @@ public class TestTcpClient
 
             ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-            SearchRequest request = searchClient.prepareSearch()
+            SearchRequest request = searchClient.prepareSearch(INDEX)
                     .setTypes(DocumentType.DOCUMENT.getType())
                     .setQuery(qb)
                     .setExplain(true)
                     .request();
 
-            ElasticSearchResponse<GeoLocation> response = null;
+            SearchResponse response = null;
 
             try {
                 response = searchClient.search(request);
             } catch (IOException e) {
                 Assert.fail("Exception in testHttpSearch: " + e);
             }
-            List<GeoLocation> geoLocations = response.entities();
+            ElasticSearchResponse<GeoLocation> searchResponse = new ElasticSearchResponse<>(response, GeoLocation.class);
+            List<GeoLocation> geoLocations = searchResponse.entities();
 
             assertEquals(1, geoLocations.size());
             assertEquals(DOCUMENT_ID, geoLocations.get(0).getGeoId());

@@ -120,11 +120,15 @@ public class ElasticSearchHelper {
     }
 
     public static BulkProcessorConfiguration getDefaultBulkProcessorConfiguration(int numBulkActions) {
+        return getDefaultBulkProcessorConfiguration(numBulkActions, 1);
+    }
+
+    public static BulkProcessorConfiguration getDefaultBulkProcessorConfiguration(int numBulkActions, int numConcurrentRequests) {
         BulkProcessorConfiguration bulkProcessorConfiguration = new BulkProcessorConfiguration(BulkProcessingOptions.builder()
                 .setBulkActions(numBulkActions)
                 .setBulkSize(new ByteSizeValue(5, ByteSizeUnit.MB))
                 .setFlushInterval(TimeValue.timeValueSeconds(5))
-                .setConcurrentRequests(1)
+                .setConcurrentRequests(numConcurrentRequests)
                 .setBackoffPolicy(
                         BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3))
                 .build());

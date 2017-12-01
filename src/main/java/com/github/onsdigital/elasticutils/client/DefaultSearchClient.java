@@ -19,15 +19,21 @@ public interface DefaultSearchClient<T> extends AutoCloseable {
 
     IndexResponse index(IndexRequest request) throws IOException;
 
-    void bulk(T entity);
+    void bulk(String index, T entity);
 
-    void bulk(List<T> entities);
+    void bulk(String index, List<T> entities);
 
-    void bulk(Stream<T> entities);
+    void bulk(String index, Stream<T> entities);
 
     SimpleIndexRequestBuilder prepareIndex();
 
-    SimpleSearchRequestBuilder prepareSearch();
+    default SimpleSearchRequestBuilder prepareSearch(String index) {
+        return prepareSearch(new String[]{
+                index
+        });
+    }
+
+    SimpleSearchRequestBuilder prepareSearch(String[] indices);
 
     SimpleDeleteRequestBuilder prepareDelete();
 

@@ -9,6 +9,8 @@ import com.github.onsdigital.elasticutils.util.JsonUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -26,55 +29,55 @@ import java.util.stream.Stream;
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchClient.class);
-
-    protected final String index;
-    protected final DocumentType type;
-    protected final Class<T> returnClass;
-
-    public ElasticSearchClient(String index, final Class<T> returnClass) {
-        this.index = index;
-        this.type = DocumentType.DOCUMENT;
-        this.returnClass = returnClass;
-//        Runtime.getRuntime().addShutdownHook(new ElasticSearchClient.ShutDownThread(this));
-    }
+    protected static final DocumentType DEFAULT_DOCUMENT_TYPE = DocumentType.DOCUMENT;
 
     // INDEX //
 
     @Override
-    public void bulk(T entity) {
-        bulk(Arrays.asList(entity));
+    public void bulk(String index, T entity) {
+        bulk(index, Arrays.asList(entity));
     }
 
     @Override
-    public void bulk(List<T> entities) {
-        bulk(entities.stream());
+    public void bulk(String index, List<T> entities) {
+        bulk(index, entities.stream());
     }
 
     @Override
-    public void bulk(Stream<T> entities) {
-        bulk(entities, XContentType.JSON);
+    public void bulk(String index, Stream<T> entities) {
+        bulk(index, entities, XContentType.JSON);
     }
 
-    public void bulk(Stream<T> entities, XContentType contentType) {
+    public void bulk(String index, Stream<T> entities, XContentType contentType) {
         BulkProcessor bulkProcessor = this.getBulkProcessor();
         entities
                 .map(x -> JsonUtils.convertJsonToBytes(x))
                 .filter(x -> x.isPresent())
-                .map(x -> createIndexRequest(x.get(), contentType))
+                .map(x -> createIndexRequest(index, x.get(), contentType))
                 .forEach(bulkProcessor::add);
     }
 
-    protected IndexRequest createIndexRequest(byte[] messageBytes, XContentType xContentType) {
-        return createIndexRequestWithPipeline(messageBytes, null, xContentType);
+    protected IndexRequest createIndexRequest(String index, byte[] messageBytes, XContentType xContentType) {
+        return createIndexRequestWithPipeline(index, messageBytes, null, xContentType);
     }
 
-    protected abstract IndexRequest createIndexRequestWithPipeline(byte[] messageBytes, String pipeline, XContentType xContentType);
+    protected abstract IndexRequest createIndexRequestWithPipeline(String index, byte[] messageBytes, String pipeline, XContentType xContentType);
 
     protected abstract BulkProcessor getBulkProcessor();
 
     // SEARCH //
 
-    public abstract ElasticSearchResponse<T> search(SearchRequest request) throws IOException;
+    public abstract SearchResponse search(SearchRequest request) throws IOException;
+
+    // DELETE //
+
+    public abstract boolean dropIndex(String index) throws IOException;
+
+    // ADMIN //
+
+    public abstract boolean indexExists(String index);
+
+    public abstract boolean createIndex(String index, Settings settings, Map<String, Object> mapping);
 
     // BUILDERS //
 
@@ -84,8 +87,8 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     @Override
-    public SimpleSearchRequestBuilder prepareSearch() {
-        return new SimpleSearchRequestBuilder(this.index);
+    public SimpleSearchRequestBuilder prepareSearch(String[] indices) {
+        return new SimpleSearchRequestBuilder(indices);
     }
 
     @Override

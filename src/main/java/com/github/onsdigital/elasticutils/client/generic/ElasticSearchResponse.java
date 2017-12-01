@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public class ElasticSearchResponse<T> {
     private SearchResponse response;
     private Class<T> returnClass;
 
-    protected ElasticSearchResponse(SearchResponse response, Class<T> returnClass) {
+    public ElasticSearchResponse(SearchResponse response, Class<T> returnClass) {
         this.response = response;
         this.returnClass = returnClass;
     }

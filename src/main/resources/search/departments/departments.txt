@@ -1,0 +1,82 @@
+#This file contains external department links that will be suggested based on search phrases listed below.
+#The departments are indexed under "departments" index
+
+#Format( all should be in a single line ):
+#department_code =>  department_name => url => search phrase 1, search phrase 2
+
+#####The departments are indexed in the same order as it is in the mapping, that means if two departments match for a search query with the same score the ordering will be as it is ordered in this file.
+# e.g. for search query "nhs woodland";  "The NHS" will come before "The Forestry Commission"
+# or for search query "education"; "The Department for Education and Pensions" will be before "The Department for Business Innovation & Skills"
+# Make sure the ordering is done accordingly
+
+
+##########MAPPING#############
+dfe => The Department for Education => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-education => DFE,education,A level,degree,NVQ,school,college,university,curriculum,qualification,teacher training,pupil absence,exclusions,school workforce,key stage,higher education
+
+beis => The Department for Business, Energy and Industrial Strategy => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-business-energy-and-industrial-strategy&from_date=&to_date= => BEIS,BIS,business,apprenticeship,building,construction,trade union,enterprise,DECC,energy,solar,coal,oil,gas,electricity,fuel poverty,renewables ,greenhouse gas
+
+defra => The Department for Environment Food & Rural Affairs => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-environment-food-rural-affairs => DEFRA,agriculture,farming,air quality,emissions,recycling,food,conservation,biodiversity,animals,wildlife,ecosystem
+
+hmrc => HM Revenue & Customs => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=hm-revenue-customs => HMRC,tax,benefit,paye,national insurance,vat,tobacco
+
+ho => The Home Office => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=home-office => HO,arrests,asylum,immigration,firearm,crime,visa,police,terrorism,detention
+
+dclg => The Department for Communities & Local Government => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-communities-and-local-government => DCLG,revenue expenditure,local authority,council tax,homelessness,social housing,help to buy
+
+dcms => The Department for Culture, Media & Sports => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-culture-media-sport => DCMS, charitable giving
+
+dft => The Department for Transport => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-transport => DFT,bus,vehicle,driver,rider,freight,vehicle licensing,road,biofuel,road casualties,traffic congestion,road conditions,transport,car
+
+dwp => The Department for Work & Pensions => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-for-work-pensions =>DWP,social fund,child maintenance,lone parents,child support agency,benefit fraud,universal credit,pensions,pensioners
+
+dh => The Department of Health => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=department-of-health =>DH,abortion
+
+mod => The Ministry of Defence => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=ministry-of-defence =>MOD,defence,armed forces,military,veterans,war pensions
+
+moj => The Ministry of Justice => https://www.gov.uk/government/statistics?keywords=&topics%5B%5D=all&departments%5B%5D=ministry-of-justice&from_date=&to_date= =>MOJ,criminal justice,prison,offender,civil justice,knife possession,youth custody,probation,reoffence,asbo
+
+nhs => NHS => https://digital.nhs.uk/article/191/Find-data-and-publications =>NHS,dementia,waiting times,hospital,critical care,inpatient,outpatient,ambulance,obesity
+
+tis => The Insolvency Service => https://www.gov.uk/government/statistics?departments%5B%5D=insolvency-service => TIS, insolvency
+
+wg => The Welsh Government => http://wales.gov.uk => WG,Wales,Welsh
+
+sg => The Scottish Government => http://www.scotland.gov.uk/Topics/Statistics => SG,Scotland,Scottish
+
+nie => The Northern Ireland Executive => http://www.northernireland.gov.uk/ => NIE,Northern Ireland,Irish
+
+fc => The Forestry Commission => http://www.forestry.gov.uk/ =>FC,woodland,timber,forestry,nursery
+
+eutrade => Our visual site => https://visual.ons.gov.uk/trading-places-uk-goods-trade-with-eu-partners/ => EU, EU trade, Europe trade, European trade
+
+volunteering => Our visual site => https://visual.ons.gov.uk/billion-pound-loss-in-volunteering-effort-in-the-last-3-years/ => Volunteering, volunteer, charity, charity work
+
+basketofgoods => Our visual site => https://www.ons.gov.uk/visualisations/dvc399/shorthand/index.html => Basket of goods
+
+housing => Our visual site => https://visual.ons.gov.uk/prospective-homeowners-struggling-to-get-onto-the-property-ladder/ => Housing, home ownership, pricing, property
+
+economicdashboard => Our visual site => https://visual.ons.gov.uk/dashboard/ => Brexit, indicators, economic indicators, economy
+
+householdspending => Our visual site => https://visual.ons.gov.uk/london-household-spending-outstrips-the-rest-of-the-uk/ => Family spending, spending, household spending, household expenditure, household goods, regional spending
+
+genderpaygap => Our visual site => https://visual.ons.gov.uk/find-out-the-gender-pay-gap-for-your-job/ => Gender pay gap, pay, earnings, gender equality
+
+migration => Our visual site => https://visual.ons.gov.uk/tag/migration/ => Migration, population, Historical migration, migration timeseries, migrants, international migration
+
+unpaidwork => Our visual site => https://visual.ons.gov.uk/the-value-of-your-unpaid-work/ => Unpaid work
+
+gdp => Our visual site => https://visual.ons.gov.uk/tag/gdp/ => GDP, What is GDP?, GDP time series, Historical GDP
+
+babynames => Our visual site => https://visual.ons.gov.uk/baby-names-since-1904-how-has-yours-performed/ => Baby names, baby girls, baby boys, girls names, boys names, popular names
+
+deaths => Our visual site => https://visual.ons.gov.uk/does-our-sex-affect-what-we-die-from/ => Causes of death, reason for death
+
+livingwage => Our visual site => https://visual.ons.gov.uk/how-will-the-national-living-wage-affect-employees-and-businesses-in-the-uk/ => National living wage, living wage, wages
+
+pregnancy => Our visual site => https://visual.ons.gov.uk/teenage-pregnancies-perception-versus-reality/ => Teenage pregnancy, pregnancy, conceptions
+
+healthcarespending => Our visual site => https://visual.ons.gov.uk/how-does-uk-healthcare-spending-compare-internationally/ => Healthcare spending
+
+wellbeingdashboard => Our visual site => https://www.ons.gov.uk/visualisations/dvc364/dashboard/index.html => Well-being, wellbeing, well being dashboard
+
+strikes => Our visual site => https://visual.ons.gov.uk/the-history-of-strikes-in-britain/ => History of strikes, industrial action, strikes
