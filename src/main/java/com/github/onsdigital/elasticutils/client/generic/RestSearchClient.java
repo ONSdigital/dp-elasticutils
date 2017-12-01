@@ -1,10 +1,10 @@
 package com.github.onsdigital.elasticutils.client.generic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
@@ -23,7 +23,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.xpack.common.http.HttpMethod;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -159,13 +158,19 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
         this.client.close();
     }
 
-    public static void main(String[] args) {
-        SimpleRestClient client = ElasticSearchHelper.getRestClient("localhost");
+    public static RestSearchClient getLocalClient() {
         BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+        return getLocalClient(configuration);
+    }
 
+    public static RestSearchClient getLocalClient(BulkProcessorConfiguration configuration) {
+        return new RestSearchClient<>(ElasticSearchHelper.getRestClient(Host.LOCALHOST), configuration);
+    }
+
+    public static void main(String[] args) {
         String index = "test";
 
-        try (RestSearchClient searchClient = new RestSearchClient(client, configuration)) {
+        try (RestSearchClient searchClient = RestSearchClient.getLocalClient()) {
             boolean indexExists = searchClient.indexExists(index);
             System.out.println("Index exists: " + indexExists);
 

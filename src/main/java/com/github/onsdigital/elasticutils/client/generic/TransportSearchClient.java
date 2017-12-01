@@ -1,6 +1,8 @@
 package com.github.onsdigital.elasticutils.client.generic;
 
+import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
+import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -17,6 +19,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 /**
@@ -95,6 +98,15 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
 
     public AdminClient admin() {
         return this.client.admin();
+    }
+
+    public static TransportSearchClient getLocalClient() throws UnknownHostException {
+        BulkProcessorConfiguration configuration = ElasticSearchHelper.getDefaultBulkProcessorConfiguration();
+        return getLocalClient(configuration);
+    }
+
+    public static TransportSearchClient getLocalClient(BulkProcessorConfiguration configuration) throws UnknownHostException {
+        return new TransportSearchClient<>(ElasticSearchHelper.getTransportClient(Host.LOCALHOST), configuration);
     }
 
     @Override

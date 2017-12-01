@@ -2,6 +2,7 @@ package com.github.onsdigital.elasticutils.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.bulk.options.BulkProcessingOptions;
 import com.github.onsdigital.elasticutils.client.generic.RestSearchClient;
@@ -53,6 +54,25 @@ public class ElasticSearchHelper {
 
     /**
      *
+     * @param host
+     * @return
+     */
+    public static SimpleRestClient getRestClient(Host host) {
+        return getRestClient(host.getHostName());
+    }
+
+    /**
+     *
+     * @param host
+     * @param http_port
+     * @return
+     */
+    public static SimpleRestClient getRestClient(Host host, int http_port) {
+        return getRestClient(host.getHostName(), http_port);
+    }
+
+    /**
+     *
      * @param hostName
      * @return
      */
@@ -83,6 +103,27 @@ public class ElasticSearchHelper {
     }
 
     // TCP
+
+    /**
+     *
+     * @param host
+     * @return
+     * @throws UnknownHostException
+     */
+    public static TransportClient getTransportClient(Host host) throws UnknownHostException {
+        return getTransportClient(host.getHostName());
+    }
+
+    /**
+     *
+     * @param host
+     * @param transport_port
+     * @return
+     * @throws UnknownHostException
+     */
+    public static TransportClient getTransportClient(Host host, int transport_port) throws UnknownHostException {
+        return getTransportClient(host.getHostName(), transport_port);
+    }
 
     /**
      *
