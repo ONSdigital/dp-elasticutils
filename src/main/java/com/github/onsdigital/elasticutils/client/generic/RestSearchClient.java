@@ -1,10 +1,10 @@
 package com.github.onsdigital.elasticutils.client.generic;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
@@ -22,7 +22,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.xpack.common.http.HttpMethod;
 
-import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -174,15 +173,16 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
                 searchClient.dropIndex(index);
             }
 
-            Settings.Builder settingsBuilder = Settings.builder().
-                    loadFromStream("index-config.yml", RestSearchClient.class.getResourceAsStream("/search/index-config.yml"));
-            Settings settings = settingsBuilder.build();
+//            Settings.Builder settingsBuilder = Settings.builder().
+//                    loadFromStream("index-config.yml", RestSearchClient.class.getResourceAsStream("/search/index-config.yml"));
+            Settings settings = ElasticSearchHelper.loadSettingsFromFile("/search/", "index-config.yml");
 //            Settings settings = Settings.EMPTY;
 
-            InputStream mappingSourceStream = RestSearchClient.class.getResourceAsStream("/search/default-mapping.json");
-            String mappingSource = IOUtils.toString(mappingSourceStream);
+//            InputStream mappingSourceStream = RestSearchClient.class.getResourceAsStream("/search/default-mapping.json");
+//            String mappingSource = IOUtils.toString(mappingSourceStream);
 
-            Map<String, Object> mapping = MAPPER.readValue(mappingSource, HashMap.class);
+//            Map<String, Object> mapping = MAPPER.readValue(mappingSource, HashMap.class);
+            Map<String, Object> mapping = ElasticSearchHelper.loadMappingFromFile("/search/", "default-mapping.json");
             System.out.println(mapping);
 
             System.out.println(searchClient.createIndex(index, settings, mapping));

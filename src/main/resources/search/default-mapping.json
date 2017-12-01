@@ -6,66 +6,66 @@
     ],
     "properties": {
       "type": {
-        "type": "string"
+        "type": "text"
       },
       "description": {
         "properties": {
           "cdid": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_standard"
           },
           "datasetId": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_standard"
           },
           "title": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_synonym_stem",
             "search_analyzer": "ons_stem",
             "fields": {
               "title_raw": {
-                "type": "string"
+                "type": "text"
               },
               "title_no_stem" : {
-                "type" : "string",
+                "type" : "text",
                 "analyzer" : "ons_synonym",
                 "search_analyzer" : "ons_standard"
               },
               "title_no_synonym_no_stem" : {
-                "type" : "string",
+                "type" : "text",
                 "analyzer" : "ons_standard"
               },
               "title_no_dates": {
-                "type": "string",
+                "type": "text",
                 "analyzer": "ons_synonym_stem_clear_dates",
                 "search_analyzer": "ons_stem_clear_dates"
               },
               "title_first_letter": {
-                "type": "string",
+                "type": "text",
                 "analyzer": "first_letter"
               }
             }
           },
           "edition": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_synonym_stem",
             "search_analyzer": "ons_stem"
           },
           "metaDescription": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_standard"
           },
           "summary": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_standard"
           },
           "keywords": {
-            "type": "string",
+            "type": "text",
             "analyzer": "ons_synonym_stem",
             "search_analyzer": "ons_stem",
             "fields": {
               "keywords_raw": {
-                "type": "string"
+                "type": "text"
               }
             }
           },
@@ -75,12 +75,10 @@
         }
       },
       "searchBoost": {
-        "type": "string",
+        "type": "text",
         "analyzer": "ons_synonym_stem",
         "search_analyzer": "ons_stem",
-        "norms": {
-          "enabled": false
-        }
+        "norms": false
       }
     }
   },
@@ -89,19 +87,13 @@
       "description" : {
         "properties" : {
           "title": {
-            "norms": {
-              "enabled": false
-            },
+            "norms": false,
             "fields": {
               "title_no_stem" : {
-                "norms": {
-                  "enabled": false
-                }
+                "norms": false
               },
               "title_no_dates": {
-                "norms": {
-                  "enabled": false
-                }
+                "norms": false
               }
             }
           }
