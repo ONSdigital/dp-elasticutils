@@ -182,7 +182,7 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
 //            String mappingSource = IOUtils.toString(mappingSourceStream);
 
 //            Map<String, Object> mapping = MAPPER.readValue(mappingSource, HashMap.class);
-            Map<String, Object> mapping = ElasticSearchHelper.loadMappingFromFile("/search/", "default-mapping.json");
+            Map<String, Object> mapping = ElasticSearchHelper.loadMappingFromFile("/search", "default-document-mapping.json");
             System.out.println(mapping);
 
             System.out.println(searchClient.createIndex(index, settings, mapping));
