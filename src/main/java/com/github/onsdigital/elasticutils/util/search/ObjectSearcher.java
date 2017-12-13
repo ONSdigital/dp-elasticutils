@@ -1,4 +1,4 @@
-package com.github.onsdigital.elasticutils.util;
+package com.github.onsdigital.elasticutils.util.search;
 
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchResponse;

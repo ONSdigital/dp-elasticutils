@@ -2,7 +2,7 @@ package com.github.onsdigital.elasticutils.models;
 
 import com.github.onsdigital.elasticutils.TestHttpClient;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
-import com.github.onsdigital.elasticutils.util.ObjectSearcher;
+import com.github.onsdigital.elasticutils.util.search.ObjectSearcher;
 
 /**
  * @author sullid (David Sullivan) on 15/11/2017
