@@ -1,8 +1,10 @@
 package com.github.onsdigital.elasticutils.models;
 
-import com.github.onsdigital.elasticutils.TestHttpClient;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
+import com.github.onsdigital.elasticutils.util.search.ElasticSearchIndex;
 import com.github.onsdigital.elasticutils.util.search.ObjectSearcher;
+import com.github.onsdigital.elasticutils.util.search.Searchable;
 
 /**
  * @author sullid (David Sullivan) on 15/11/2017
@@ -10,7 +12,10 @@ import com.github.onsdigital.elasticutils.util.search.ObjectSearcher;
  *
  * Simple POJO to test Elasticsearch client
  */
-public class GeoLocation {
+public class GeoLocation implements Searchable {
+
+    @JsonIgnore
+    private static final SearchIndex index = SearchIndex.TEST;
 
     private String geoId;
 
@@ -39,6 +44,12 @@ public class GeoLocation {
     }
 
     public static ObjectSearcher<GeoLocation> searcher(ElasticSearchClient<GeoLocation> searchClient) {
-        return new ObjectSearcher<>(searchClient, TestHttpClient.ElasticIndex.TEST.getIndexName(), GeoLocation.class);
+        return new ObjectSearcher<>(searchClient, SearchIndex.TEST, GeoLocation.class);
     }
+
+    @Override
+    public ElasticSearchIndex getIndex() {
+        return index;
+    }
+
 }

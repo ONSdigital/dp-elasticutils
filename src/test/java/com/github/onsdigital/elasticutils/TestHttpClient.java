@@ -6,6 +6,7 @@ import com.github.onsdigital.elasticutils.client.generic.RestSearchClient;
 import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import com.github.onsdigital.elasticutils.client.type.DefaultDocumentTypes;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
+import com.github.onsdigital.elasticutils.models.SearchIndex;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
@@ -40,7 +41,6 @@ public class TestHttpClient {
 
     private static final String HOSTNAME = "localhost";
     private static final String DOCUMENT_ID = UUID.randomUUID().toString();
-    private static final String INDEX = ElasticIndex.TEST.getIndexName();
 
     private RestSearchClient<GeoLocation> getClient(ElasticSearchPort port) {
         SimpleRestClient client = ElasticSearchHelper.getRestClient(HOSTNAME, port.getPort());
@@ -62,7 +62,7 @@ public class TestHttpClient {
                 ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
                 IndexRequest request = searchClient.prepareIndex()
-                        .setIndex(ElasticIndex.TEST.getIndexName())
+                        .setIndex(geoLocation.getIndex().getIndexName())
                         .setType(DefaultDocumentTypes.DOCUMENT.getType())
                         .setSource(geoLocation)
                         .request()
@@ -85,7 +85,7 @@ public class TestHttpClient {
         for (ElasticSearchPort port : ElasticSearchPort.values()) {
             RestSearchClient client = getClient(port);
             try {
-                boolean success = client.dropIndex(INDEX);
+                boolean success = client.dropIndex(SearchIndex.TEST.getIndexName());
                 assertTrue(success);
             } catch (IOException e) {
                 Assert.fail("Failed to delete test index: " + e);
@@ -117,15 +117,9 @@ public class TestHttpClient {
 
             ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-            SearchRequest request = searchClient.prepareSearch(INDEX)
-                    .setTypes(DefaultDocumentTypes.DOCUMENT.getType())
-                    .setQuery(qb)
-                    .setExplain(true)
-                    .request();
-
             List<GeoLocation> geoLocations = null;
             try {
-                geoLocations = GeoLocation.searcher(searchClient).search(request);
+                geoLocations = GeoLocation.searcher(searchClient).search(qb, DefaultDocumentTypes.DOCUMENT);
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -170,20 +164,6 @@ public class TestHttpClient {
 
         public int getPort() {
             return port;
-        }
-    }
-
-    public enum ElasticIndex {
-        TEST("test");
-
-        private String indexName;
-
-        ElasticIndex(String indexName) {
-            this.indexName = indexName;
-        }
-
-        public String getIndexName() {
-            return indexName;
         }
     }
 

@@ -5,11 +5,11 @@ import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
 import com.github.onsdigital.elasticutils.client.generic.TransportSearchClient;
 import com.github.onsdigital.elasticutils.client.type.DefaultDocumentTypes;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
+import com.github.onsdigital.elasticutils.models.SearchIndex;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
@@ -41,7 +41,6 @@ public class TestTcpClient
 
     private static final String HOSTNAME = "localhost";
     private static final String DOCUMENT_ID = UUID.randomUUID().toString();
-    private static final String INDEX = ElasticIndex.TEST.getIndexName();
 
     private TransportSearchClient<GeoLocation> getClient(TestTcpClient.ElasticSearchPort port) {
         Settings settings = Settings.builder().put("cluster.name", port.getClusterName()).build();
@@ -71,7 +70,7 @@ public class TestTcpClient
                 TransportSearchClient<GeoLocation> searchClient = getClient(port);
 
                 IndexRequest request = searchClient.prepareIndex()
-                        .setIndex(TestHttpClient.ElasticIndex.TEST.getIndexName())
+                        .setIndex(geoLocation.getIndex().getIndexName())
                         .setType(DefaultDocumentTypes.DOCUMENT.getType())
                         .setSource(geoLocation)
                         .request()
@@ -94,7 +93,7 @@ public class TestTcpClient
         for (TestTcpClient.ElasticSearchPort port : TestTcpClient.ElasticSearchPort.values()) {
             TransportSearchClient<GeoLocation> client = getClient(port);
 
-            boolean success = client.dropIndex(INDEX);
+            boolean success = client.dropIndex(SearchIndex.TEST.getIndexName());
             assertTrue(success);
         }
     }
@@ -129,15 +128,9 @@ public class TestTcpClient
 
             ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
-            SearchRequest request = searchClient.prepareSearch(INDEX)
-                    .setTypes(DefaultDocumentTypes.DOCUMENT.getType())
-                    .setQuery(qb)
-                    .setExplain(true)
-                    .request();
-
             List<GeoLocation> geoLocations = null;
             try {
-                geoLocations = GeoLocation.searcher(searchClient).search(request);
+                geoLocations = GeoLocation.searcher(searchClient).search(qb, DefaultDocumentTypes.DOCUMENT);
             } catch (IOException e) {
                 Assert.fail(e.getMessage());
             }
@@ -169,20 +162,6 @@ public class TestTcpClient
 
         public String getClusterName() {
             return clusterName;
-        }
-    }
-
-    public enum ElasticIndex {
-        TEST("test");
-
-        private String indexName;
-
-        ElasticIndex(String indexName) {
-            this.indexName = indexName;
-        }
-
-        public String getIndexName() {
-            return indexName;
         }
     }
 
