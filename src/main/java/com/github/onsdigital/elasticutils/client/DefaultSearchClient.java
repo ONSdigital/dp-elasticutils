@@ -4,6 +4,7 @@ import com.github.onsdigital.elasticutils.action.delete.SimpleDeleteRequestBuild
 import com.github.onsdigital.elasticutils.action.index.SimpleIndexRequestBuilder;
 import com.github.onsdigital.elasticutils.action.search.SimpleSearchRequestBuilder;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
+import com.github.onsdigital.elasticutils.util.search.ElasticSearchIndex;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 

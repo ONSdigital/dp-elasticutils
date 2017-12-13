@@ -7,6 +7,7 @@ import com.github.onsdigital.elasticutils.client.DefaultSearchClient;
 import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.JsonUtils;
+import com.github.onsdigital.elasticutils.util.search.ElasticSearchIndex;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -58,10 +59,10 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     protected IndexRequest createIndexRequest(String index, DocumentType documentType, byte[] messageBytes, XContentType xContentType) {
-        return createIndexRequestWithPipeline(index, documentType, messageBytes, null, xContentType);
+        return createIndexRequestWithPipeline(index, documentType, null, messageBytes, xContentType);
     }
 
-    protected abstract IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType);
+    protected abstract IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType);
 
     protected abstract BulkProcessor getBulkProcessor();
 

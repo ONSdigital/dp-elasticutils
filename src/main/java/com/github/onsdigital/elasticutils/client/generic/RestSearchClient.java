@@ -49,11 +49,14 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    public IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType) {
+    public IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType) {
         IndexRequest indexRequest = new IndexRequest(index)
                 .source(messageBytes, XContentType.JSON)
-                .setPipeline(pipeline.getPipeline())
                 .type(documentType.getType());
+
+        if (pipeline != null) {
+            indexRequest.setPipeline(pipeline.getPipeline());
+        }
 
         return indexRequest;
     }

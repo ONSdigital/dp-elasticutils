@@ -19,10 +19,14 @@ import java.util.List;
 public class ObjectSearcher<T> {
 
     private ElasticSearchClient<T> searchClient;
-    private ElasticSearchIndex index;
+    private String index;
     private Class<T> returnClass;
 
     public ObjectSearcher(ElasticSearchClient<T> searchClient, ElasticSearchIndex index, Class<T> returnClass) {
+        this(searchClient, index.getIndexName(), returnClass);
+    }
+
+    public ObjectSearcher(ElasticSearchClient<T> searchClient, String index, Class<T> returnClass) {
         this.searchClient = searchClient;
         this.index = index;
         this.returnClass = returnClass;
@@ -46,7 +50,7 @@ public class ObjectSearcher<T> {
     }
 
     public List<T> search(QueryBuilder qb, DocumentType documentType) throws IOException {
-        SearchRequest request = searchClient.prepareSearch(this.index.getIndexName())
+        SearchRequest request = searchClient.prepareSearch(this.index)
                 .setTypes(documentType.getType())
                 .setQuery(qb)
                 .request();

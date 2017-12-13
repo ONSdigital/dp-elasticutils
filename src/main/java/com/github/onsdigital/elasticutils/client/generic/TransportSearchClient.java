@@ -12,6 +12,7 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -41,13 +42,17 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType) {
-        return this.client.prepareIndex()
+    protected IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType) {
+        IndexRequestBuilder builder = this.client.prepareIndex()
                 .setIndex(index)
                 .setType(documentType.getType())
-                .setSource(messageBytes, xContentType)
-                .setPipeline(pipeline.getPipeline())
-                .request();
+                .setSource(messageBytes, xContentType);
+
+        if (pipeline != null) {
+            builder.setPipeline(pipeline.getPipeline());
+        }
+
+        return builder.request();
     }
 
     @Override
