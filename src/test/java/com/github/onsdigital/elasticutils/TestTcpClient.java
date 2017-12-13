@@ -2,16 +2,14 @@ package com.github.onsdigital.elasticutils;
 
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
-import com.github.onsdigital.elasticutils.client.generic.ElasticSearchResponse;
 import com.github.onsdigital.elasticutils.client.generic.TransportSearchClient;
-import com.github.onsdigital.elasticutils.client.type.DocumentType;
+import com.github.onsdigital.elasticutils.client.type.DefaultDocumentTypes;
 import com.github.onsdigital.elasticutils.models.GeoLocation;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpStatus;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
@@ -74,7 +72,7 @@ public class TestTcpClient
 
                 IndexRequest request = searchClient.prepareIndex()
                         .setIndex(TestHttpClient.ElasticIndex.TEST.getIndexName())
-                        .setType(DocumentType.DOCUMENT.getType())
+                        .setType(DefaultDocumentTypes.DOCUMENT.getType())
                         .setSource(geoLocation)
                         .request()
                         .setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
@@ -132,20 +130,17 @@ public class TestTcpClient
             ElasticSearchClient<GeoLocation> searchClient = getClient(port);
 
             SearchRequest request = searchClient.prepareSearch(INDEX)
-                    .setTypes(DocumentType.DOCUMENT.getType())
+                    .setTypes(DefaultDocumentTypes.DOCUMENT.getType())
                     .setQuery(qb)
                     .setExplain(true)
                     .request();
 
-            SearchResponse response = null;
-
+            List<GeoLocation> geoLocations = null;
             try {
-                response = searchClient.search(request);
+                geoLocations = GeoLocation.searcher(searchClient).search(request);
             } catch (IOException e) {
-                Assert.fail("Exception in testHttpSearch: " + e);
+                Assert.fail(e.getMessage());
             }
-            ElasticSearchResponse<GeoLocation> searchResponse = new ElasticSearchResponse<>(response, GeoLocation.class);
-            List<GeoLocation> geoLocations = searchResponse.entities();
 
             assertEquals(1, geoLocations.size());
             assertEquals(DOCUMENT_ID, geoLocations.get(0).getGeoId());

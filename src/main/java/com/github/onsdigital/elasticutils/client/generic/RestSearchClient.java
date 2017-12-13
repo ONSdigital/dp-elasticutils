@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
+import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
+import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -47,11 +49,11 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    public IndexRequest createIndexRequestWithPipeline(String index, byte[] messageBytes, String pipeline, XContentType xContentType) {
+    public IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType) {
         IndexRequest indexRequest = new IndexRequest(index)
                 .source(messageBytes, XContentType.JSON)
-                .setPipeline(pipeline)
-                .type(super.DEFAULT_DOCUMENT_TYPE.getType());
+                .setPipeline(pipeline.getPipeline())
+                .type(documentType.getType());
 
         return indexRequest;
     }
@@ -132,14 +134,16 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean createIndex(String index, Settings settings, Map<String, Object> mapping) {
+    public boolean createIndex(String index, DocumentType documentType, Settings settings, Map<String, Object> mapping) {
         RestClient client = this.getLowLevelClient();
 
         String endpoint = endpoint(index);
         Map<String, String> params = Collections.emptyMap();
 
         Map<String, Object> content = new HashMap<>();
-        content.put("mappings", mapping);
+        content.put("mappings", new HashMap<String, Object>() {{
+            put(documentType.getType(), mapping);
+        }});
         content.put("settings", settings.getAsMap());
         try {
             String jsonString = MAPPER.writeValueAsString(content);
@@ -178,23 +182,30 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
                 searchClient.dropIndex(index);
             }
 
-//            Settings.Builder settingsBuilder = Settings.builder().
-//                    loadFromStream("index-config.yml", RestSearchClient.class.getResourceAsStream("/search/index-config.yml"));
             Settings settings = ElasticSearchHelper.loadSettingsFromFile("/search/", "index-config.yml");
-//            Settings settings = Settings.EMPTY;
-
-//            InputStream mappingSourceStream = RestSearchClient.class.getResourceAsStream("/search/default-mapping.json");
-//            String mappingSource = IOUtils.toString(mappingSourceStream);
-
-//            Map<String, Object> mapping = MAPPER.readValue(mappingSource, HashMap.class);
             Map<String, Object> mapping = ElasticSearchHelper.loadMappingFromFile("/search", "default-document-mapping.json");
             System.out.println(mapping);
 
-            System.out.println(searchClient.createIndex(index, settings, mapping));
+            System.out.println(searchClient.createIndex(index, DocType.DOCUMENT, settings, mapping));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    enum DocType implements DocumentType {
+        DOCUMENT("document");
+
+        private String type;
+
+        DocType(String type) {
+            this.type = type;
+        }
+
+        @Override
+        public String getType() {
+            return type;
         }
     }
 }

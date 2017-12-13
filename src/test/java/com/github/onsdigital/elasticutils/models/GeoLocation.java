@@ -1,5 +1,9 @@
 package com.github.onsdigital.elasticutils.models;
 
+import com.github.onsdigital.elasticutils.TestHttpClient;
+import com.github.onsdigital.elasticutils.client.generic.ElasticSearchClient;
+import com.github.onsdigital.elasticutils.util.ObjectSearcher;
+
 /**
  * @author sullid (David Sullivan) on 15/11/2017
  * @project dp-elasticutils
@@ -32,5 +36,9 @@ public class GeoLocation {
 
     public double getLon() {
         return lon;
+    }
+
+    public static ObjectSearcher<GeoLocation> searcher(ElasticSearchClient<GeoLocation> searchClient) {
+        return new ObjectSearcher<>(searchClient, TestHttpClient.ElasticIndex.TEST.getIndexName(), GeoLocation.class);
     }
 }

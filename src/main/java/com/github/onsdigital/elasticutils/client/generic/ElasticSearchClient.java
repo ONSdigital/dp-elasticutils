@@ -4,6 +4,7 @@ import com.github.onsdigital.elasticutils.action.delete.SimpleDeleteRequestBuild
 import com.github.onsdigital.elasticutils.action.index.SimpleIndexRequestBuilder;
 import com.github.onsdigital.elasticutils.action.search.SimpleSearchRequestBuilder;
 import com.github.onsdigital.elasticutils.client.DefaultSearchClient;
+import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.JsonUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -29,39 +30,38 @@ import java.util.stream.Stream;
 public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchClient.class);
-    protected static final DocumentType DEFAULT_DOCUMENT_TYPE = DocumentType.DOCUMENT;
 
     // INDEX //
 
     @Override
-    public void bulk(String index, T entity) {
-        bulk(index, Arrays.asList(entity));
+    public void bulk(String index, DocumentType documentType, T entity) {
+        bulk(index, documentType, Arrays.asList(entity));
     }
 
     @Override
-    public void bulk(String index, List<T> entities) {
-        bulk(index, entities.stream());
+    public void bulk(String index, DocumentType documentType, List<T> entities) {
+        bulk(index, documentType, entities.stream());
     }
 
     @Override
-    public void bulk(String index, Stream<T> entities) {
-        bulk(index, entities, XContentType.JSON);
+    public void bulk(String index, DocumentType documentType, Stream<T> entities) {
+        bulk(index, documentType, entities, XContentType.JSON);
     }
 
-    public void bulk(String index, Stream<T> entities, XContentType contentType) {
+    public void bulk(String index, DocumentType documentType, Stream<T> entities, XContentType contentType) {
         BulkProcessor bulkProcessor = this.getBulkProcessor();
         entities
                 .map(x -> JsonUtils.convertJsonToBytes(x))
                 .filter(x -> x.isPresent())
-                .map(x -> createIndexRequest(index, x.get(), contentType))
+                .map(x -> createIndexRequest(index, documentType, x.get(), contentType))
                 .forEach(bulkProcessor::add);
     }
 
-    protected IndexRequest createIndexRequest(String index, byte[] messageBytes, XContentType xContentType) {
-        return createIndexRequestWithPipeline(index, messageBytes, null, xContentType);
+    protected IndexRequest createIndexRequest(String index, DocumentType documentType, byte[] messageBytes, XContentType xContentType) {
+        return createIndexRequestWithPipeline(index, documentType, messageBytes, null, xContentType);
     }
 
-    protected abstract IndexRequest createIndexRequestWithPipeline(String index, byte[] messageBytes, String pipeline, XContentType xContentType);
+    protected abstract IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType);
 
     protected abstract BulkProcessor getBulkProcessor();
 
@@ -77,7 +77,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
 
     public abstract boolean indexExists(String index);
 
-    public abstract boolean createIndex(String index, Settings settings, Map<String, Object> mapping);
+    public abstract boolean createIndex(String index, DocumentType documentType, Settings settings, Map<String, Object> mapping);
 
     // BUILDERS //
 

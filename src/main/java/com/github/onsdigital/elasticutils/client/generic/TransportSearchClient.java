@@ -2,6 +2,8 @@ package com.github.onsdigital.elasticutils.client.generic;
 
 import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
+import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
+import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -39,12 +41,12 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected IndexRequest createIndexRequestWithPipeline(String index, byte[] messageBytes, String pipeline, XContentType xContentType) {
+    protected IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, byte[] messageBytes, Pipeline pipeline, XContentType xContentType) {
         return this.client.prepareIndex()
                 .setIndex(index)
-                .setType(super.DEFAULT_DOCUMENT_TYPE.getType())
+                .setType(documentType.getType())
                 .setSource(messageBytes, xContentType)
-                .setPipeline(pipeline)
+                .setPipeline(pipeline.getPipeline())
                 .request();
     }
 
@@ -87,11 +89,11 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     }
 
     @Override
-    public boolean createIndex(String index, Settings settings, Map<String, Object> mapping) {
+    public boolean createIndex(String index, DocumentType documentType, Settings settings, Map<String, Object> mapping) {
         CreateIndexRequest request = new CreateIndexRequest()
                 .index(index)
                 .settings(settings)
-                .mapping(super.DEFAULT_DOCUMENT_TYPE.getType(), mapping);
+                .mapping(documentType.getType(), mapping);
         CreateIndexResponse response = this.admin().indices().create(request).actionGet();
         return response.isAcknowledged();
     }

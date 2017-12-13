@@ -4,17 +4,8 @@ package com.github.onsdigital.elasticutils.client.type;
  * @author sullid (David Sullivan) on 29/11/2017
  * @project dp-elasticutils
  */
-public enum DocumentType {
+public interface DocumentType {
 
-    DOCUMENT("document");
+    String getType();
 
-    private String type;
-
-    DocumentType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
-    }
 }

@@ -3,6 +3,7 @@ package com.github.onsdigital.elasticutils.client;
 import com.github.onsdigital.elasticutils.action.delete.SimpleDeleteRequestBuilder;
 import com.github.onsdigital.elasticutils.action.index.SimpleIndexRequestBuilder;
 import com.github.onsdigital.elasticutils.action.search.SimpleSearchRequestBuilder;
+import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 
@@ -19,11 +20,11 @@ public interface DefaultSearchClient<T> extends AutoCloseable {
 
     IndexResponse index(IndexRequest request) throws IOException;
 
-    void bulk(String index, T entity);
+    void bulk(String index, DocumentType documentType, T entity);
 
-    void bulk(String index, List<T> entities);
+    void bulk(String index, DocumentType documentType, List<T> entities);
 
-    void bulk(String index, Stream<T> entities);
+    void bulk(String index, DocumentType documentType, Stream<T> entities);
 
     SimpleIndexRequestBuilder prepareIndex();
 

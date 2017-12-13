@@ -10,6 +10,7 @@ import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.message.BasicHeader;
 import org.elasticsearch.action.bulk.BackoffPolicy;
 import org.elasticsearch.client.RestClient;
@@ -99,6 +100,28 @@ public class ElasticSearchHelper {
         SimpleRestClient client = new SimpleRestClient(builder);
 
         LOGGER.info("Successfully made HTTP connection to ES database: {} {}", hostName, http_port);
+        return client;
+    }
+
+    public static SimpleRestClient getRestClientWithTimeout(String hostName, int http_port) {
+        int connectTimeout = 5000;
+        int socketTimeout = 60000;
+        int maxRetryTimeoutMillis = 60000;
+        return getRestClientWithTimeout(hostName, http_port, connectTimeout, socketTimeout, maxRetryTimeoutMillis);
+    }
+
+    public static SimpleRestClient getRestClientWithTimeout(String hostName, int http_port, int connectTimeout,
+                                                            int socketTimeout, int maxRetryTimeoutMillis) {
+        RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200))
+                .setRequestConfigCallback(new RestClientBuilder.RequestConfigCallback() {
+                    @Override
+                    public RequestConfig.Builder customizeRequestConfig(RequestConfig.Builder requestConfigBuilder) {
+                        return requestConfigBuilder.setConnectTimeout(5000)
+                                .setSocketTimeout(60000);
+                    }
+                })
+                .setMaxRetryTimeoutMillis(60000);
+        SimpleRestClient client = new SimpleRestClient(builder);
         return client;
     }
 
