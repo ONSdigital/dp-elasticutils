@@ -1,5 +1,6 @@
 package com.github.onsdigital.elasticutils.client.generic;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.github.onsdigital.elasticutils.action.delete.SimpleDeleteRequestBuilder;
 import com.github.onsdigital.elasticutils.action.index.SimpleIndexRequestBuilder;
 import com.github.onsdigital.elasticutils.action.search.SimpleSearchRequestBuilder;
@@ -7,7 +8,6 @@ import com.github.onsdigital.elasticutils.client.DefaultSearchClient;
 import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.JsonUtils;
-import com.github.onsdigital.elasticutils.util.search.ElasticSearchIndex;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
@@ -50,9 +50,14 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     }
 
     public void bulk(String index, DocumentType documentType, Stream<T> entities, XContentType contentType) {
+        this.bulk(index, documentType, entities, contentType, JsonInclude.Include.USE_DEFAULTS);
+    }
+
+    public void bulk(String index, DocumentType documentType, Stream<T> entities,
+                     XContentType contentType, JsonInclude.Include include) {
         BulkProcessor bulkProcessor = this.getBulkProcessor();
         entities
-                .map(x -> JsonUtils.convertJsonToBytes(x))
+                .map(x -> JsonUtils.convertJsonToBytes(x, include))
                 .filter(x -> x.isPresent())
                 .map(x -> createIndexRequest(index, documentType, x.get(), contentType))
                 .forEach(bulkProcessor::add);
