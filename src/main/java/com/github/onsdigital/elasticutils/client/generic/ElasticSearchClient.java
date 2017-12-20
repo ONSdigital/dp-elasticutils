@@ -63,6 +63,19 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
                 .forEach(bulkProcessor::add);
     }
 
+    public void addToBulk(IndexRequest indexRequest) {
+        this.addToBulk(Arrays.asList(indexRequest));
+    }
+
+    public void addToBulk(List<IndexRequest> indexRequests) {
+        this.addToBulk(indexRequests.stream());
+    }
+
+    public void addToBulk(Stream<IndexRequest> indexRequests) {
+        BulkProcessor bulkProcessor = this.getBulkProcessor();
+        indexRequests.forEach(bulkProcessor::add);
+    }
+
     protected IndexRequest createIndexRequest(String index, DocumentType documentType, byte[] messageBytes, XContentType xContentType) {
         return createIndexRequestWithPipeline(index, documentType, null, messageBytes, xContentType);
     }
