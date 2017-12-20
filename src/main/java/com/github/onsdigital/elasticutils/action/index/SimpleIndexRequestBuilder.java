@@ -87,7 +87,15 @@ public class SimpleIndexRequestBuilder implements SimpleActionRequest<IndexReque
 
     public SimpleIndexRequestBuilder setSource(Object source, XContentType xContentType) {
         byte[] messageBytes = JsonUtils.convertJsonToBytes(source).get();
-        request.source(messageBytes, xContentType);
+        return this.setSource(messageBytes, xContentType);
+    }
+
+    public SimpleIndexRequestBuilder setSource(byte[] source) {
+        return this.setSource(source, XContentType.JSON);
+    }
+
+    public SimpleIndexRequestBuilder setSource(byte[] source, XContentType xContentType) {
+        request.source(source, xContentType);
         return this;
     }
 

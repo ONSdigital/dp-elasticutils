@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
 import com.github.onsdigital.elasticutils.client.http.SimpleRestClient;
-import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.apache.http.HttpEntity;
@@ -21,7 +20,6 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.xpack.common.http.HttpMethod;
 
 import java.io.IOException;
@@ -47,19 +45,6 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
     }
 
     // INDEX //
-
-    @Override
-    public IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType) {
-        IndexRequest indexRequest = new IndexRequest(index)
-                .source(messageBytes, XContentType.JSON)
-                .type(documentType.getType());
-
-        if (pipeline != null) {
-            indexRequest.setPipeline(pipeline.getPipeline());
-        }
-
-        return indexRequest;
-    }
 
     @Override
     protected BulkProcessor getBulkProcessor() {

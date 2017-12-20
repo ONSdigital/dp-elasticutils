@@ -80,7 +80,19 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         return createIndexRequestWithPipeline(index, documentType, null, messageBytes, xContentType);
     }
 
-    protected abstract IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType);
+    protected IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType) {
+        SimpleIndexRequestBuilder indexRequestBuilder = this.prepareIndex()
+                .setIndex(index)
+                .setType(documentType.getType())
+                .setSource(messageBytes, xContentType);
+
+        if (pipeline != null) {
+            indexRequestBuilder.setPipeline(pipeline.getPipeline());
+        }
+
+        IndexRequest indexRequest = indexRequestBuilder.request();
+        return indexRequest;
+    }
 
     protected abstract BulkProcessor getBulkProcessor();
 

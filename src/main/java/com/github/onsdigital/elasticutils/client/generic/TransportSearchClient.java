@@ -2,7 +2,6 @@ package com.github.onsdigital.elasticutils.client.generic;
 
 import com.github.onsdigital.elasticutils.client.Host;
 import com.github.onsdigital.elasticutils.client.bulk.configuration.BulkProcessorConfiguration;
-import com.github.onsdigital.elasticutils.client.pipeline.Pipeline;
 import com.github.onsdigital.elasticutils.client.type.DocumentType;
 import com.github.onsdigital.elasticutils.util.ElasticSearchHelper;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -12,14 +11,12 @@ import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.XContentType;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -40,20 +37,6 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     }
 
     // INDEX //
-
-    @Override
-    protected IndexRequest createIndexRequestWithPipeline(String index, DocumentType documentType, Pipeline pipeline, byte[] messageBytes, XContentType xContentType) {
-        IndexRequestBuilder builder = this.client.prepareIndex()
-                .setIndex(index)
-                .setType(documentType.getType())
-                .setSource(messageBytes, xContentType);
-
-        if (pipeline != null) {
-            builder.setPipeline(pipeline.getPipeline());
-        }
-
-        return builder.request();
-    }
 
     @Override
     protected BulkProcessor getBulkProcessor() {
