@@ -39,7 +39,7 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     // INDEX //
 
     @Override
-    protected BulkProcessor getBulkProcessor() {
+    public BulkProcessor getBulkProcessor() {
         return this.bulkProcessor;
     }
 

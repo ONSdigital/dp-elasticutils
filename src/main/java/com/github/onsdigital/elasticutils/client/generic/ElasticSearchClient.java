@@ -94,7 +94,7 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
         return indexRequest;
     }
 
-    protected abstract BulkProcessor getBulkProcessor();
+    public abstract BulkProcessor getBulkProcessor();
 
     // SEARCH //
 
