@@ -14,6 +14,7 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
@@ -55,6 +56,11 @@ public class TransportSearchClient<T> extends ElasticSearchClient<T> {
     public SearchResponse search(SearchRequest request) {
         SearchResponse response = this.client.search(request).actionGet();
         return response;
+    }
+
+    @Override
+    public SearchResponse searchScroll(SearchScrollRequest request) throws IOException {
+        return this.client.searchScroll(request).actionGet();
     }
 
     // DELETE //

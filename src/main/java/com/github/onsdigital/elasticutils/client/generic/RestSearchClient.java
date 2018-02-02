@@ -16,6 +16,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.main.MainResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.Strings;
@@ -63,6 +64,11 @@ public class RestSearchClient<T> extends ElasticSearchClient<T> {
     public SearchResponse search(SearchRequest request) throws IOException {
         SearchResponse response = this.client.search(request);
         return response;
+    }
+
+    @Override
+    public SearchResponse searchScroll(SearchScrollRequest request) throws IOException {
+        return this.client.searchScroll(request);
     }
 
     // DELETE //

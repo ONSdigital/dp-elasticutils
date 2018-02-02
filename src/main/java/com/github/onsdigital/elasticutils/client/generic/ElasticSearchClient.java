@@ -12,6 +12,7 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.slf4j.Logger;
@@ -99,6 +100,8 @@ public abstract class ElasticSearchClient<T> implements DefaultSearchClient<T> {
     // SEARCH //
 
     public abstract SearchResponse search(SearchRequest request) throws IOException;
+
+    public abstract SearchResponse searchScroll(SearchScrollRequest request) throws IOException;
 
     // DELETE //
 
