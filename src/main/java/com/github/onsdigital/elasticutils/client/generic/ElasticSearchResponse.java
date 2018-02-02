@@ -17,14 +17,23 @@ import java.util.List;
 public class ElasticSearchResponse<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchResponse.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private  ObjectMapper mapper;
 
     private SearchResponse response;
     private Class<T> returnClass;
 
     public ElasticSearchResponse(SearchResponse response, Class<T> returnClass) {
+        this(response, new ObjectMapper(), returnClass);
+    }
+
+    public ElasticSearchResponse(SearchResponse response, ObjectMapper mapper, Class<T> returnClass) {
         this.response = response;
+        this.mapper = mapper;
         this.returnClass = returnClass;
+    }
+
+    public void setMapper(ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 
     public SearchResponse getResponse() {
@@ -42,7 +51,7 @@ public class ElasticSearchResponse<T> {
 
         searchHits.forEach(hit -> {
             try {
-                results.add(MAPPER.readValue(hit.getSourceAsString(), returnClass));
+                results.add(this.mapper.readValue(hit.getSourceAsString(), returnClass));
             } catch (IOException e) {
                 LOGGER.error("Error unmarshalling from json", e);
             }

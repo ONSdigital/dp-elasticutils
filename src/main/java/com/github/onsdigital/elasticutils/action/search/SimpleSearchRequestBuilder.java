@@ -14,6 +14,7 @@ import org.elasticsearch.search.aggregations.PipelineAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.collapse.CollapseBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.rescore.RescoreBuilder;
 import org.elasticsearch.search.slice.SliceBuilder;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -399,6 +400,11 @@ public class SimpleSearchRequestBuilder implements SimpleActionRequest<SearchReq
      */
     public SimpleSearchRequestBuilder suggest(SuggestBuilder suggestBuilder) {
         sourceBuilder().suggest(suggestBuilder);
+        return this;
+    }
+
+    public SimpleSearchRequestBuilder addRescorer(RescoreBuilder<?> rescorer) {
+        sourceBuilder().addRescorer(rescorer);
         return this;
     }
 
