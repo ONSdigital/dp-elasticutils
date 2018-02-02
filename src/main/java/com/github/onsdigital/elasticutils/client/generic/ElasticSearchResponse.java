@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ public class ElasticSearchResponse<T> {
     }
 
     public List<T> entities() {
-        List<T> results = new ArrayList<>();
+        List<T> results = new LinkedList<>();
 
         SearchHits searchHits = this.getSearchHits();
 
